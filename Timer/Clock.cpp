@@ -38,7 +38,10 @@ Clock::Clock(const Clock& other) : Circle::Circle((Circle)other)
 Clock::~Clock()
 {
     work = FALSE;
+
     DeleteObject(clockBackgroundBrush);
+    DeleteObject(backgroundBrush);
+    DeleteObject(clockBorderPen);
     DeleteObject(hourLabelPen);
     DeleteObject(minuteLabelPen);
     DeleteObject(secondArrowPen);
@@ -97,6 +100,23 @@ DWORD __stdcall Clock::UpdateArrows(void* lParam)
     BOOL mSended;
     DWORD error;
     HWND handle = *args->hWnd;
+
+
+
+    {
+        time(args->rawTime);
+        args->TimeInfo = localtime(args->rawTime);
+        UCHAR controlSecond=args->TimeInfo->tm_sec, currSec= args->TimeInfo->tm_sec;
+
+        while (controlSecond==currSec)
+        {
+            time(args->rawTime);
+            args->TimeInfo = localtime(args->rawTime);
+            currSec = args->TimeInfo->tm_sec;
+        }
+    }
+    
+
     while (*args->work)
     {
         Sleep(1000);
@@ -131,11 +151,22 @@ void Clock::Draw(HDC* hdc)
 
     InitTime();
 
-    HGDIOBJ oldBrush = SelectObject(*hdc, clockBackgroundBrush);
+    HGDIOBJ oldBrush = SelectObject(*hdc, backgroundBrush);
     HGDIOBJ oldPen = SelectObject(*hdc, clockBorderPen);
+    
+    const RECT& clockCircleRect = GetRect();
+    RECT back
+    { 
+        clockCircleRect.left-3,
+        clockCircleRect.top-3,
+        clockCircleRect.right+3,
+        clockCircleRect.bottom+3
+    };
+    FillRect(*hdc, &back, backgroundBrush);
+    SelectObject(*hdc, clockBackgroundBrush);
 
 
-    RECT clockCircleRect = this->FindSelfRect();
+    
     Ellipse(*hdc, clockCircleRect.left, clockCircleRect.top,
         clockCircleRect.right, clockCircleRect.bottom);
 
@@ -178,7 +209,7 @@ void Clock::Draw(HDC* hdc)
             tRect.right = tRect.left + 15;
             tRect.bottom = tRect.top + 15;
 
-            //DrawTextA(*hdc, Clock::CLOCK_DIGITS[i-1].c_str(), 2, &tRect, NULL);
+            DrawTextA(*hdc, Clock::CLOCK_DIGITS[i-1].c_str(), 2, &tRect, NULL);
         }
     }
     SetBkColor(*hdc, RGB(0, 0, 0));
@@ -200,7 +231,7 @@ void Clock::Draw(HDC* hdc)
             ((!(TimeInfo.tm_hour % 12)) ?
                 -M_PI_2 : M_PI * 2 * (TimeInfo.tm_hour % 12) / 12 - M_PI_2) +
             M_PI / 12. / 60. * TimeInfo.tm_min,
-            -GetRadius() * 3 / 4);
+            -GetRadius() * 5 / 8);
         p2 = GetRingPoint(
             ((!(TimeInfo.tm_hour % 12)) ?
                 -M_PI_2 : M_PI * 2 * (TimeInfo.tm_hour % 12) / 12 - M_PI_2) + M_PI +

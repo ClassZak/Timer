@@ -34,7 +34,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 
-Clock clockObj(100, { 15 + 100,15 + 100 });
+Clock clockObj(100, { 100+3,100 +3});
 
 
 
@@ -125,7 +125,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, 0, 600, 400, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -183,8 +183,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             clockObj.SetWindowHandle(&hWnd);
             clockObj.StartUpdateThread();
-            clockObj.Draw(&hdc);
-            
+            HDC memDC = CreateCompatibleDC(hdc);
+            HBITMAP memBM = 
+                CreateCompatibleBitmap(hdc, 
+                    clockObj.GetRect().right - clockObj.GetRect().left+6, 
+                    clockObj.GetRect().bottom - clockObj.GetRect().top+6);
+            SelectObject(memDC, memBM);
+
+            // Рисуем на внутреннем буфере
+            clockObj.Draw(&memDC);
+
+            // Копируем внутренний буфер на экран
+            BitBlt(hdc, 15, 15, 
+                clockObj.GetRect().right - clockObj.GetRect().left+6, 
+                clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
+
+            // Освобождаем ресурсы
+            DeleteObject(memBM);
+            DeleteDC(memDC);
 
             
             EndPaint(hWnd, &ps);

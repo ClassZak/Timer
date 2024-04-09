@@ -6,6 +6,7 @@ class Circle
 {
 	float radius=0.f;
 	POINT center{0,0};
+	RECT selfRect;
 public:
 	Circle();
 	Circle(POINT center);
@@ -27,11 +28,14 @@ public:
 
 	double FindSquare();
 	POINT GetRingPoint(double angle, float radiusBias = 0.f)const;
-	RECT FindSelfRect()const;
+	
+	const RECT& GetRect()const;
 
 
 
 	bool operator==(const Circle& other);
 	bool operator!=(const Circle& other);
+protected:
+	const RECT& FindSelfRect();
 };
 

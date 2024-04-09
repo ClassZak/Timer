@@ -35,8 +35,9 @@ protected:
 
 
 	HBRUSH clockBackgroundBrush = CreateSolidBrush(RGB(224, 224, 224));
+	HBRUSH backgroundBrush = CreateSolidBrush(RGB(255, 255, 255));
 	HPEN clockBorderPen = CreatePen(PS_SOLID, 5, RGB(0, 0, 0));
-	HPEN hourLabelPen = CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
+	HPEN hourLabelPen = CreatePen(PS_SOLID, 4, RGB(0, 0, 0));
 	HPEN minuteLabelPen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
 	HPEN secondArrowPen = reinterpret_cast<HPEN> (GetStockObject(BLACK_PEN));
 	

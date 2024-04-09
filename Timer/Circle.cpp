@@ -2,23 +2,29 @@
 
 Circle::Circle()
 {
+	FindSelfRect();
 }
 Circle::Circle(POINT center)
 {
 	this->center = center;
+	FindSelfRect();
 }
 Circle::Circle(float radius)
 {
 	this->radius = radius;
+	FindSelfRect();
 }
 Circle::Circle(POINT center, float radius) : center{ center }, radius{ radius }
 {
+	FindSelfRect();
 }
 Circle::Circle(float radius, POINT center) : Circle::Circle(center,radius)
 {
+	FindSelfRect();
 }
 Circle::Circle(const Circle& other)
 {
+	FindSelfRect();
 	this->center = other.center;
 	this->radius = other.radius;
 }
@@ -33,6 +39,7 @@ float Circle::GetRadius() const
 void Circle::SetRadius(float radius)
 {
 	this->radius = radius;
+	FindSelfRect();
 }
 
 const POINT& Circle::GetCenter() const
@@ -43,6 +50,7 @@ const POINT& Circle::GetCenter() const
 void Circle::SetCenter(const POINT& center)
 {
 	this->center = center;
+	FindSelfRect();
 }
 
 
@@ -62,12 +70,18 @@ POINT Circle::GetRingPoint(double angle, float radiusBias) const
 }
 
 
-RECT Circle::FindSelfRect()const
+const RECT& Circle::FindSelfRect()
 {
 	RECT rect{ center.x - (LONG)radius, center.y - (LONG)radius,
 			   center.x + (LONG)radius, center.y + (LONG)radius };
+	this->selfRect = rect;
 
-	return rect;
+	return this->selfRect;
+}
+
+const RECT& Circle::GetRect() const
+{
+	return this->selfRect;
 }
 
 
