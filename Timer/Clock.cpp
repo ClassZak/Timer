@@ -108,7 +108,7 @@ DWORD __stdcall Clock::UpdateArrows(void* lParam)
         //UpdateWindow(handle);
         mSended = TRUE;
 
-        //PostMessageA(handle, WM_PAINT, NULL, NULL);
+        PostMessageA(handle, WM_PAINT, NULL, NULL);
         if (!mSended)
             error = GetLastError();
     }
@@ -163,32 +163,25 @@ void Clock::Draw(HDC* hdc)
         LineTo(*hdc, p.x, p.y);
     }
 
-
-
-
-    //SetTextColor(*hdc, RGB(0, 0, 0));
-
-    /*
+    //digits
     SetBkColor(*hdc, RGB(224, 224, 224));
     {
         RECT tRect{ 0,0,0,0 };
         for (UCHAR i = 1; i <= 12; ++i)
         {
             double angle = (!i) ? 0 : M_PI * 2. * i / 12 - M_PI_2;
-            POINT p = GetRingPoint(angle, -30);
+            POINT p = GetRingPoint(angle, -40);
 
 
-            tRect.left = p.x + ((i >= 6) ? -10 : 0);
-            if (i == 6)
-                tRect.left += 6;
+            tRect.left = p.x + -10;
             tRect.top = p.y - 5;
             tRect.right = tRect.left + 15;
             tRect.bottom = tRect.top + 15;
 
-            DrawTextA(*hdc, std::to_string(i).c_str(), 2, &tRect, NULL);
+            //DrawTextA(*hdc, Clock::CLOCK_DIGITS[i-1].c_str(), 2, &tRect, NULL);
         }
     }
-    SetBkColor(*hdc, RGB(0, 0, 0));*/
+    SetBkColor(*hdc, RGB(0, 0, 0));
 
     SelectObject(*hdc, oldBrush);
     SelectObject(*hdc, clockBorderPen);
@@ -224,11 +217,11 @@ void Clock::Draw(HDC* hdc)
         p1 = GetRingPoint(
             ((!(TimeInfo.tm_min)) ?
                 -M_PI_2 : M_PI * 2 * (TimeInfo.tm_min) / 60 - M_PI_2),
-            -GetRadius() * 2 / 3);
+            -GetRadius() * 1/2);
         p2 = GetRingPoint(
             ((!(TimeInfo.tm_min)) ?
                 -M_PI_2 : M_PI * 2 * (TimeInfo.tm_min) / 60 - M_PI_2) + M_PI,
-            -GetRadius() * 2/6);
+            -GetRadius() * 5/6);
         MoveToEx(*hdc, p1.x, p1.y, NULL);
         LineTo(*hdc, p2.x, p2.y);
     }
@@ -256,3 +249,21 @@ void Clock::Draw(HDC* hdc)
 }
 
 
+
+
+
+const std::string Clock::CLOCK_DIGITS[12] =
+{
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+};

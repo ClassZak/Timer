@@ -3,6 +3,7 @@
 #include "Circle.h"
 #include <math.h>
 #include <ctime>
+#include <string>
 #include <Windows.h>
 
 class Clock : public Circle
@@ -52,5 +53,6 @@ protected:
 
 	
 	static DWORD WINAPI UpdateArrows(void* lParam);
+	static const std::string CLOCK_DIGITS[12];
 };
 

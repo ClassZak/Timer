@@ -34,7 +34,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 
-Clock clockObj(300, { 15 + 300,15 + 300 });
+Clock clockObj(100, { 15 + 100,15 + 100 });
 
 
 
