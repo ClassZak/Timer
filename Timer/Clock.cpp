@@ -69,7 +69,7 @@ void Clock::StartUpdateThread()
         };
 
         CreateThread(NULL,
-            10000,
+            1000,
             Clock::UpdateArrows,
             (void*)params,
             0,
@@ -97,8 +97,6 @@ void Clock::SetWindowHandle(HWND* hWnd)
 DWORD __stdcall Clock::UpdateArrows(void* lParam)
 {
     UpdateArrowsArgumentsStruct* args = (UpdateArrowsArgumentsStruct*)(lParam);
-    BOOL mSended;
-    DWORD error;
     HWND handle = *args->hWnd;
 
 
@@ -114,6 +112,7 @@ DWORD __stdcall Clock::UpdateArrows(void* lParam)
             args->TimeInfo = localtime(args->rawTime);
             currSec = args->TimeInfo->tm_sec;
         }
+        RedrawWindow(handle, args->rect, NULL, RDW_INVALIDATE);
     }
     
 
@@ -125,12 +124,7 @@ DWORD __stdcall Clock::UpdateArrows(void* lParam)
         
 
         RedrawWindow(handle, args->rect, NULL, RDW_INVALIDATE);
-        //UpdateWindow(handle);
-        mSended = TRUE;
-
         PostMessageA(handle, WM_PAINT, NULL, NULL);
-        if (!mSended)
-            error = GetLastError();
     }
     delete args->rect;
 
@@ -248,7 +242,7 @@ void Clock::Draw(HDC* hdc)
         p1 = GetRingPoint(
             ((!(TimeInfo.tm_min)) ?
                 -M_PI_2 : M_PI * 2 * (TimeInfo.tm_min) / 60 - M_PI_2),
-            -GetRadius() * 1/2);
+            -GetRadius() * 1/3);
         p2 = GetRingPoint(
             ((!(TimeInfo.tm_min)) ?
                 -M_PI_2 : M_PI * 2 * (TimeInfo.tm_min) / 60 - M_PI_2) + M_PI,
