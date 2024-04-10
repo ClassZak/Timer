@@ -36,7 +36,7 @@ LRESULT CALLBACK    ChildDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
 
 
 Clock clockObj(100, { 100+3,100 +3});
-
+Clock clockObj2(100, { 100 + 3,100 + 3 });
 
 
 
@@ -243,7 +243,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT CALLBACK ChildDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
@@ -251,12 +251,46 @@ LRESULT CALLBACK ChildDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         // Инициализация элементов управления
         return TRUE;
 
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        RECT windowRect;
+        GetClientRect(hWnd, &windowRect);
+        HDC hdc = BeginPaint(hWnd, &ps);
+
+
+        clockObj2.SetWindowHandle(&hWnd);
+        clockObj2.StartUpdateThread();
+        HDC memDC = CreateCompatibleDC(hdc);
+        HBITMAP memBM =
+            CreateCompatibleBitmap(hdc,
+                clockObj2.GetRect().right - clockObj2.GetRect().left + 6,
+                clockObj2.GetRect().bottom - clockObj2.GetRect().top + 6);
+        SelectObject(memDC, memBM);
+
+        // Рисуем на внутреннем буфере
+        clockObj2.Draw(&memDC);
+
+        // Копируем внутренний буфер на экран
+        BitBlt(hdc, 15, 15,
+            clockObj2.GetRect().right - clockObj2.GetRect().left + 6,
+            clockObj2.GetRect().bottom - clockObj2.GetRect().top + 6, memDC, 0, 0, SRCCOPY);
+
+        // Освобождаем ресурсы
+        DeleteObject(memBM);
+        DeleteDC(memDC);
+
+
+        EndPaint(hWnd, &ps);
+        break;
+    }
+        
     case WM_COMMAND:
         // Обработка команд
         return 0;
 
     case WM_CLOSE:
-        EndDialog(hwnd, 0);
+        EndDialog(hWnd, 0);
         return 0;
     }
     return FALSE;
