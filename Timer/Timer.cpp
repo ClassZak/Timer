@@ -291,9 +291,23 @@ LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
     }
         
     case WM_COMMAND:
-        // Обработка команд
+    {
+        int buttonWindowID = LOWORD(wParam);
+        switch (buttonWindowID)
+        {
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        default:
+            break;
+        }
         return 0;
-
+        break;
+    }
+        
     case WM_CLOSE:
         EndDialog(hWnd, 0);
         return 0;
