@@ -26,6 +26,7 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK    ChildDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 
@@ -69,6 +70,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
+    DialogBox(hInstance, MAKEINTRESOURCE(IDD_CHILD_DIALOG), NULL, ChildDialogProc);
     // Цикл основного сообщения:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
@@ -233,4 +235,29 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+
+
+
+
+
+
+LRESULT CALLBACK ChildDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg)
+    {
+    case WM_INITDIALOG:
+        // Инициализация элементов управления
+        return TRUE;
+
+    case WM_COMMAND:
+        // Обработка команд
+        return 0;
+
+    case WM_CLOSE:
+        EndDialog(hwnd, 0);
+        return 0;
+    }
+    return FALSE;
 }
