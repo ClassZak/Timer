@@ -176,12 +176,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            
+        
             PAINTSTRUCT ps;
             RECT windowRect; 
             GetClientRect(hWnd, &windowRect);
             HDC hdc = BeginPaint(hWnd, &ps);
-            
+
+
+
 
             clockObj.SetWindowHandle(&hWnd);
             clockObj.StartUpdateThread();
@@ -257,6 +259,9 @@ LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
         RECT windowRect;
         GetClientRect(hWnd, &windowRect);
         HDC hdc = BeginPaint(hWnd, &ps);
+
+
+        FillRect(hdc, &windowRect, reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
 
 
         clockObj2.SetWindowHandle(&hWnd);
