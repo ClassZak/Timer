@@ -261,7 +261,7 @@ LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
         HDC hdc = BeginPaint(hWnd, &ps);
 
 
-        FillRect(hdc, &windowRect, reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
+        //FillRect(hdc, &windowRect, reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
 
 
         clockObj2.SetWindowHandle(&hWnd);
@@ -301,6 +301,11 @@ LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
         case IDM_ABOUT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
             break;
+        case IDC_ADD_BUTTON:
+        {
+            MessageBox(hWnd, L"Функционал ещё не добавлен", L"Ошибка", MB_OK | MB_ICONERROR);
+            break;
+        }
         default:
             break;
         }
