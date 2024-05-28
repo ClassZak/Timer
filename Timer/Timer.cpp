@@ -24,9 +24,8 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса глав�
 // Отправить объявления функций, включенных в этот модуль кода:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK    ChildDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK    WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 
@@ -36,7 +35,7 @@ LRESULT CALLBACK    ChildDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
 
 
 Clock clockObj(100, { 100+3,100 +3});
-Clock clockObj2(100, { 100 + 3,100 + 3 });
+BOOL AppIsRun = TRUE;
 
 
 
@@ -58,166 +57,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Инициализация глобальных строк
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_TIMER, szWindowClass, MAX_LOADSTRING);
-    MyRegisterClass(hInstance);
-
-    // Выполнить инициализацию приложения:
-    if (!InitInstance (hInstance, nCmdShow))
-    {
-        return FALSE;
-    }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_TIMER));
-
-    MSG msg;
-
-    DialogBox(hInstance, MAKEINTRESOURCE(IDD_CHILD_DIALOG), NULL, ChildDialogProc);
+    DialogBoxParamW(NULL, MAKEINTRESOURCE(IDD_CHILD_DIALOG), NULL, WndProc,0L);
     // Цикл основного сообщения:
-    while (GetMessage(&msg, nullptr, 0, 0))
-    {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
+    while (AppIsRun);
 
-    return (int) msg.wParam;
+    return EXIT_SUCCESS;
 }
 
 
 
-//
-//  ФУНКЦИЯ: MyRegisterClass()
-//
-//  ЦЕЛЬ: Регистрирует класс окна.
-//
-ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-    WNDCLASSEXW wcex{NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TIMER));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_TIMER);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
-}
-
-//
-//   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
-//
-//   ЦЕЛЬ: Сохраняет маркер экземпляра и создает главное окно
-//
-//   КОММЕНТАРИИ:
-//
-//        В этой функции маркер экземпляра сохраняется в глобальной переменной, а также
-//        создается и выводится главное окно программы.
-//
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
-   hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
-
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 600, 400, nullptr, nullptr, hInstance, nullptr);
-
-   if (!hWnd)
-   {
-      return FALSE;
-   }
-
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
-   return TRUE;
-}
-
-//
-//  ФУНКЦИЯ: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  ЦЕЛЬ: Обрабатывает сообщения в главном окне.
-//
-//  WM_COMMAND  - обработать меню приложения
-//  WM_PAINT    - Отрисовка главного окна
-//  WM_DESTROY  - отправить сообщение о выходе и вернуться
-//
-//
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message)
-    {
-    case WM_CREATE:
-    {
-        break;
-    }
-    case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            // Разобрать выбор в меню:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
-        }
-        break;
-    case WM_PAINT:
-        {
-        
-            PAINTSTRUCT ps;
-            RECT windowRect; 
-            GetClientRect(hWnd, &windowRect);
-            HDC hdc = BeginPaint(hWnd, &ps);
 
 
-
-
-            clockObj.SetWindowHandle(&hWnd);
-            clockObj.StartUpdateThread();
-            HDC memDC = CreateCompatibleDC(hdc);
-            HBITMAP memBM = 
-                CreateCompatibleBitmap(hdc, 
-                    clockObj.GetRect().right - clockObj.GetRect().left+6, 
-                    clockObj.GetRect().bottom - clockObj.GetRect().top+6);
-            SelectObject(memDC, memBM);
-
-            // Рисуем на внутреннем буфере
-            clockObj.Draw(&memDC);
-
-            // Копируем внутренний буфер на экран
-            BitBlt(hdc, 15, 15, 
-                clockObj.GetRect().right - clockObj.GetRect().left+6, 
-                clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
-
-            // Освобождаем ресурсы
-            DeleteObject(memBM);
-            DeleteDC(memDC);
-
-            
-            EndPaint(hWnd, &ps);
-        }
-        break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
-}
 
 // Обработчик сообщений для окна "О программе".
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -245,14 +97,24 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
     case WM_INITDIALOG:
+    {
+        int baseunitX, baseunitY;
+        HDC hdc = GetDC(NULL);
+        baseunitX = LOWORD(GetDialogBaseUnits());
+        baseunitY = HIWORD(GetDialogBaseUnits());
+        int cx = MulDiv(460, baseunitX, 4);
+        int cy = MulDiv(200, baseunitY, 8);
+        ReleaseDC(NULL, hdc);
+        SetWindowPos(hWnd, NULL, 500, 5000, cx,cy, SWP_NOZORDER | SWP_NOMOVE);
         // Инициализация элементов управления
         return TRUE;
-
+        break;
+    }
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
@@ -264,22 +126,22 @@ LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
         //FillRect(hdc, &windowRect, reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
 
 
-        clockObj2.SetWindowHandle(&hWnd);
-        clockObj2.StartUpdateThread();
+        clockObj.SetWindowHandle(&hWnd);
+        clockObj.StartUpdateThread();
         HDC memDC = CreateCompatibleDC(hdc);
         HBITMAP memBM =
             CreateCompatibleBitmap(hdc,
-                clockObj2.GetRect().right - clockObj2.GetRect().left + 6,
-                clockObj2.GetRect().bottom - clockObj2.GetRect().top + 6);
+                clockObj.GetRect().right - clockObj.GetRect().left + 6,
+                clockObj.GetRect().bottom - clockObj.GetRect().top + 6);
         SelectObject(memDC, memBM);
 
         // Рисуем на внутреннем буфере
-        clockObj2.Draw(&memDC);
+        clockObj.Draw(&memDC);
 
         // Копируем внутренний буфер на экран
         BitBlt(hdc, 15, 15,
-            clockObj2.GetRect().right - clockObj2.GetRect().left + 6,
-            clockObj2.GetRect().bottom - clockObj2.GetRect().top + 6, memDC, 0, 0, SRCCOPY);
+            clockObj.GetRect().right - clockObj.GetRect().left + 6,
+            clockObj.GetRect().bottom - clockObj.GetRect().top + 6, memDC, 0, 0, SRCCOPY);
 
         // Освобождаем ресурсы
         DeleteObject(memBM);
@@ -316,6 +178,10 @@ LRESULT CALLBACK ChildDialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
     case WM_CLOSE:
         EndDialog(hWnd, 0);
         return 0;
+        break;
+    case WM_DESTROY:
+        AppIsRun = FALSE;
+        return DefWindowProc(hWnd, msg, wParam, lParam);
     }
     return FALSE;
 }
