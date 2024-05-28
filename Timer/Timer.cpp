@@ -134,6 +134,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
+
    return TRUE;
 }
 
@@ -156,56 +157,63 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        // Разобрать выбор в меню:
+        switch (wmId)
         {
-            int wmId = LOWORD(wParam);
-            // Разобрать выбор в меню:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
         break;
+    }
+    case WM_GETMINMAXINFO: //Получили сообщение от Винды
+    {
+        MINMAXINFO* pInfo = (MINMAXINFO*)lParam;
+        POINT Min = { 600, 400 };
+        pInfo->ptMinTrackSize = Min;
+        return 0;
+        break;
+    }
     case WM_PAINT:
-        {
+    {
+        PAINTSTRUCT ps;
+        RECT windowRect; 
+        GetClientRect(hWnd, &windowRect);
+        HDC hdc = BeginPaint(hWnd, &ps);
             
-            PAINTSTRUCT ps;
-            RECT windowRect; 
-            GetClientRect(hWnd, &windowRect);
-            HDC hdc = BeginPaint(hWnd, &ps);
-            
 
-            clockObj.SetWindowHandle(&hWnd);
-            clockObj.StartUpdateThread();
-            HDC memDC = CreateCompatibleDC(hdc);
-            HBITMAP memBM = 
-                CreateCompatibleBitmap(hdc, 
-                    clockObj.GetRect().right - clockObj.GetRect().left+6, 
-                    clockObj.GetRect().bottom - clockObj.GetRect().top+6);
-            SelectObject(memDC, memBM);
-
-            // Рисуем на внутреннем буфере
-            clockObj.Draw(&memDC);
-
-            // Копируем внутренний буфер на экран
-            BitBlt(hdc, 15, 15, 
+        clockObj.SetWindowHandle(&hWnd);
+        clockObj.StartUpdateThread();
+        HDC memDC = CreateCompatibleDC(hdc);
+        HBITMAP memBM = 
+            CreateCompatibleBitmap(hdc, 
                 clockObj.GetRect().right - clockObj.GetRect().left+6, 
-                clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
+                clockObj.GetRect().bottom - clockObj.GetRect().top+6);
+        SelectObject(memDC, memBM);
 
-            // Освобождаем ресурсы
-            DeleteObject(memBM);
-            DeleteDC(memDC);
+        // Рисуем на внутреннем буфере
+        clockObj.Draw(&memDC);
+
+        // Копируем внутренний буфер на экран
+        BitBlt(hdc, 15, 15, 
+            clockObj.GetRect().right - clockObj.GetRect().left+6, 
+            clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
+
+        // Освобождаем ресурсы
+        DeleteObject(memBM);
+        DeleteDC(memDC);
 
             
-            EndPaint(hWnd, &ps);
-        }
+        EndPaint(hWnd, &ps);
         break;
+    }
     case WM_DESTROY:
         PostQuitMessage(0);
         break;

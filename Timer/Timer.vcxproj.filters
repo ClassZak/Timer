@@ -13,6 +13,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\GraphicClasses">
+      <UniqueIdentifier>{b2256656-e94a-472f-a63c-2760a374cc6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\GraphicClasses\Clock">
+      <UniqueIdentifier>{e6bdf716-785f-40ee-b9e4-bca5eda849f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\GraphicClasses">
+      <UniqueIdentifier>{32ffc5c5-e593-4ef4-a1f6-5aa9c576362b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\GraphicClasses\Clock">
+      <UniqueIdentifier>{869618d8-dc0d-48b2-9caa-3d16cfa2d089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\DeclarativeClasses">
+      <UniqueIdentifier>{be6e1e88-bfa7-415b-8996-665089fe2582}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\DeclarativeClasses">
+      <UniqueIdentifier>{e07bbf98-b659-4b0f-b529-2f9e7bba5f0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -28,9 +46,12 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Circle.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\GraphicClasses</Filter>
     </ClInclude>
     <ClInclude Include="Clock.h">
+      <Filter>Файлы заголовков\GraphicClasses\Clock</Filter>
+    </ClInclude>
+    <ClInclude Include="Form.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
@@ -39,9 +60,12 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="Circle.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\GraphicClasses</Filter>
     </ClCompile>
     <ClCompile Include="Clock.cpp">
+      <Filter>Исходные файлы\GraphicClasses\Clock</Filter>
+    </ClCompile>
+    <ClCompile Include="Form.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

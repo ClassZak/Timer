@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClInclude Include="Circle.h" />
     <ClInclude Include="Clock.h" />
+    <ClInclude Include="Form.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -139,6 +140,7 @@
   <ItemGroup>
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Clock.cpp" />
+    <ClCompile Include="Form.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
