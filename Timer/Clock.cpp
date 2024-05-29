@@ -104,14 +104,12 @@ DWORD __stdcall Clock::UpdateArrows(void* lParam)
     {
         time(args->rawTime);
         args->TimeInfo = localtime(args->rawTime);
-        UCHAR controlSecond=args->TimeInfo->tm_sec, currSec= args->TimeInfo->tm_sec;
 
-        while (controlSecond+1!=currSec)
-        {
-            time(args->rawTime);
-            args->TimeInfo = localtime(args->rawTime);
-            currSec = args->TimeInfo->tm_sec;
-        }
+        SYSTEMTIME st;
+        GetLocalTime(&st);
+        while (st.wMilliseconds>=20)
+            GetLocalTime(&st);
+
         RedrawWindow(handle, args->rect, NULL, RDW_INVALIDATE);
     }
     
