@@ -11,6 +11,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <string>
 #include "Circle.h"
 #include "Clock.h"
+#include "Form.h"
 #include <ctime>
 
 
@@ -35,6 +36,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 Clock clockObj(100, { 100+3,100 +3});
+DeclarativeClasses::Form form;
 
 
 
@@ -125,7 +127,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 600, 400, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, 0, IDS_DEFAULT_WINDOW_WIDTH, IDS_DEFAULT_WINDOW_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -154,6 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
     {
+        form.SetNewSize(0,0);
         break;
     }
     case WM_COMMAND:
