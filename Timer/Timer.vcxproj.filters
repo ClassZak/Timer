@@ -31,6 +31,9 @@
     <Filter Include="Файлы заголовков\DeclarativeClasses">
       <UniqueIdentifier>{e07bbf98-b659-4b0f-b529-2f9e7bba5f0f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\DeclarativeClasses\Form">
+      <UniqueIdentifier>{1425e9e1-35a4-48ea-bdba-533ba508dd00}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -52,7 +55,10 @@
       <Filter>Файлы заголовков\GraphicClasses\Clock</Filter>
     </ClInclude>
     <ClInclude Include="Form.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\DeclarativeClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ResizeFunctions.h">
+      <Filter>Файлы заголовков\DeclarativeClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -66,7 +72,7 @@
       <Filter>Исходные файлы\GraphicClasses\Clock</Filter>
     </ClCompile>
     <ClCompile Include="Form.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

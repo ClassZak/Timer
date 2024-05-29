@@ -133,6 +133,7 @@
     <ClInclude Include="Clock.h" />
     <ClInclude Include="Form.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="ResizeFunctions.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
