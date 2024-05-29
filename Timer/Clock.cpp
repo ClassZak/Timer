@@ -106,7 +106,7 @@ DWORD __stdcall Clock::UpdateArrows(void* lParam)
         args->TimeInfo = localtime(args->rawTime);
         UCHAR controlSecond=args->TimeInfo->tm_sec, currSec= args->TimeInfo->tm_sec;
 
-        while (controlSecond==currSec)
+        while (controlSecond+1!=currSec)
         {
             time(args->rawTime);
             args->TimeInfo = localtime(args->rawTime);
