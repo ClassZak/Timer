@@ -60,6 +60,12 @@
     <ClInclude Include="ResizeFunctions.h">
       <Filter>Файлы заголовков\DeclarativeClasses</Filter>
     </ClInclude>
+    <ClInclude Include="AForm.h">
+      <Filter>Файлы заголовков\DeclarativeClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ControlForm.h">
+      <Filter>Файлы заголовков\DeclarativeClasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer.cpp">
@@ -72,6 +78,9 @@
       <Filter>Исходные файлы\GraphicClasses\Clock</Filter>
     </ClCompile>
     <ClCompile Include="Form.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlForm.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
     </ClCompile>
   </ItemGroup>

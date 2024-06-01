@@ -129,8 +129,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AForm.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="Clock.h" />
+    <ClInclude Include="ControlForm.h" />
     <ClInclude Include="Form.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="ResizeFunctions.h" />
@@ -141,6 +143,7 @@
   <ItemGroup>
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Clock.cpp" />
+    <ClCompile Include="ControlForm.cpp" />
     <ClCompile Include="Form.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>

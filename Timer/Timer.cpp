@@ -8,10 +8,12 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "framework.h"
 #include "Timer.h"
 #include <math.h>
+#include <stdexcept>
 #include <string>
 #include "Circle.h"
 #include "Clock.h"
 #include "Form.h"
+#include "ControlForm.h"
 #include <ctime>
 
 
@@ -156,7 +158,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
     {
-        form.SetNewSize(0,0);
+        form.SetNewSize(IDS_DEFAULT_WINDOW_WIDTH, IDS_DEFAULT_WINDOW_HEIGHT);
+        try
+        {
+            form.Resize();
+        }
+        catch (std::exception&)
+        {
+            MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
+            DestroyWindow(hWnd);
+        }
+        
         break;
     }
     case WM_COMMAND:
@@ -173,6 +185,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
+        }
+        break;
+    }
+    case WM_SIZE:
+    {
+        form.SetNewSize(LOWORD(lParam),HIWORD(lParam));
+        try
+        {
+            form.Resize();
+        }
+        catch (std::exception&)
+        {
+            MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
+            DestroyWindow(hWnd);
         }
         break;
     }

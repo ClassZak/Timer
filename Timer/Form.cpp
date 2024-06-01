@@ -9,43 +9,43 @@ Form::Form()
 
 Form::Form(int w, int h) : Form::Form()
 {
-	width_ = w;
-	height_ = h;
+	_width = w;
+	_height = h;
 }
 
 Form::Form(HANDLER_CONTAINER handlers)
 {
-	handlers_ = handlers;
+	_handlers = handlers;
 }
 
 Form::Form(int w, int h, HANDLER_CONTAINER handlers) : Form::Form(w, h)
 {
-	handlers_ = handlers;
+	_handlers = handlers;
 }
 
-Form::Form(std::function<BOOL(int, int, void*)>& function)
+Form::Form(const std::function<BOOL(int, int, void*)>& function)
 {
-	resizeFunction_ = function;
+	_resizeFunction = function;
 }
 
-Form::Form(HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
+Form::Form(HANDLER_CONTAINER handlers,const std::function<BOOL(int, int, void*)>& function)
 	: Form::Form(function)
 {
-	handlers_ = handlers;
+	_handlers = handlers;
 }
 
 Form::Form
 (
 	int w, int h,
 	HANDLER_CONTAINER handles,
-	std::function<BOOL(int, int, void*)>& function
+	const std::function<BOOL(int, int, void*)>& function
 ) : Form::Form(w, h, handles)
 {
-	resizeFunction_ = function;
+	_resizeFunction = function;
 }
 
 Form::Form(Form& other)
-	: Form::Form(other.width_, other.height_, other.handlers_, other.resizeFunction_)
+	: Form::Form(other._width, other._height, other._handlers, other._resizeFunction)
 {
 }
 #pragma endregion
@@ -55,20 +55,64 @@ Form::~Form()
 }
 #pragma endregion
 #pragma region Methods
-void Form::SetResizeMethod(std::function<BOOL(int, int, void*)>& function)
+void Form::SetResizeMethod(const std::function<BOOL(int, int, void*)>& function) 
 {
-	resizeFunction_ = function;
+	_resizeFunction = function;
 }
 
 void Form::Resize()
 {
-	resizeFunction_(width_, height_, &handlers_);
+	_resizeFunction(_width, _height, &_handlers);
 }
 
 void Form::SetNewSize(int w, int h)
 {
-	width_ = w;
-	height_ = h;
+	_width = w;
+	_height = h;
+}
+bool Form::AddItem(std::string group, std::string name, const HWND* handle)
+{
+	try
+	{
+		_handlers.at(group).push_back(std::pair<std::string, HWND>(name, *handle));
+		return EXIT_SUCCESS;
+	}
+	catch (const std::exception&)
+	{
+		return EXIT_FAILURE;
+	}
+}
+bool Form::RemoveItem(std::string group, std::string name)
+{
+	try
+	{
+		_handlers.at(group)
+			.erase
+			(
+				std::find_if
+				(
+					_handlers.at(group).begin(),
+					_handlers.at(group).end(),
+					[&name](std::pair<std::string, HWND> pair)-> bool
+					{
+						return pair.first == name;
+					}
+				)
+			);
+		return EXIT_SUCCESS;
+	}
+	catch(const std::exception& ex)
+	{
+		return EXIT_FAILURE;
+	}
+}
+void Form::Clear()
+{
+	_handlers.clear();
+}
+const HANDLER_CONTAINER& Form::GetHandlers()const
+{
+	return _handlers;
 }
 #pragma endregion
 }
