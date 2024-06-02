@@ -12,7 +12,6 @@
 #define IDI_SMALL                       108
 #define IDC_TIMER                       109
 #define IDR_MAINFRAME                   128
-#define IDI_ICON1                       129
 #define IDI_TIMER_ICON                  129
 #define IDS_DEFAULT_WINDOW_HEIGHT       400
 #define IDS_DEFAULT_WINDOW_WIDTH        600
