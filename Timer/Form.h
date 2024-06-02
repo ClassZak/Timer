@@ -5,10 +5,12 @@
 #include <string>
 #include <functional>
 #include "AForm.h"
+#include "ResizeFunctions.h"
+#include "Types.h"
+
 
 namespace DeclarativeClasses
 {
-typedef std::map<std::string, std::list<std::pair<std::string, HWND>>> HANDLER_CONTAINER;
 /// <summary>
 /// Класс для управления размерами объектов
 /// </summary>

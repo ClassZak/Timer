@@ -139,12 +139,14 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="ControlForm.cpp" />
     <ClCompile Include="Form.cpp" />
+    <ClCompile Include="ResizeFunctions.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +155,7 @@
   <ItemGroup>
     <Image Include="small.ico" />
     <Image Include="Timer.ico" />
+    <Image Include="TimerIcon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

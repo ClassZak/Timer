@@ -74,6 +74,13 @@ bool Form::AddItem(std::string group, std::string name, const HWND* handle)
 {
 	try
 	{
+		if (_handlers.count(group) == 0)
+			_handlers.insert
+			(
+				std::pair<std::string, std::list<std::pair<std::string, HWND>>>
+				(group, std::list<std::pair<std::string, HWND>>())
+			);
+
 		_handlers.at(group).push_back(std::pair<std::string, HWND>(name, *handle));
 		return EXIT_SUCCESS;
 	}

@@ -34,6 +34,21 @@
     <Filter Include="Исходные файлы\DeclarativeClasses\Form">
       <UniqueIdentifier>{1425e9e1-35a4-48ea-bdba-533ba508dd00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\DeclarativeClasses\Functions">
+      <UniqueIdentifier>{d655a9ac-9c7a-497f-84f8-0449c63ffb05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\DeclarativeClasses\Functions\ResizeFunctions">
+      <UniqueIdentifier>{da3620ff-2e5b-47e7-9c27-7d215fec41ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\DeclarativeClasses\Functions">
+      <UniqueIdentifier>{42734d0c-afe4-4db2-8662-9953837d4d60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\DeclarativeClasses\Functions\ResizeFunctions">
+      <UniqueIdentifier>{0103a81f-a916-4cd0-a67c-068fe874cf0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\DeclarativeClasses\TypeDefs">
+      <UniqueIdentifier>{0a7d2da8-9254-49e8-baaa-9f3e6c219806}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -57,14 +72,17 @@
     <ClInclude Include="Form.h">
       <Filter>Файлы заголовков\DeclarativeClasses</Filter>
     </ClInclude>
-    <ClInclude Include="ResizeFunctions.h">
-      <Filter>Файлы заголовков\DeclarativeClasses</Filter>
-    </ClInclude>
     <ClInclude Include="AForm.h">
       <Filter>Файлы заголовков\DeclarativeClasses</Filter>
     </ClInclude>
     <ClInclude Include="ControlForm.h">
       <Filter>Файлы заголовков\DeclarativeClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ResizeFunctions.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Functions\ResizeFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\TypeDefs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +101,9 @@
     <ClCompile Include="ControlForm.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
     </ClCompile>
+    <ClCompile Include="ResizeFunctions.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Timer.rc">
@@ -94,6 +115,9 @@
       <Filter>Файлы ресурсов</Filter>
     </Image>
     <Image Include="Timer.ico">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="TimerIcon.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

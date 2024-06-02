@@ -1,23 +1,16 @@
 #pragma once
-#include <functional>
 #include <Windows.h>
 #include <list>
 #include <map>
 #include <string>
+#include <functional>
 namespace DeclarativeClasses
 {
-	typedef std::list<std::map<std::string, std::list<std::pair<std::string, HWND>>>> HANDLER_CONTAINER;
-
-
-	std::function<BOOL(int w, int h, void* handlers)> L1
-	(
-		[](int w, int h, void* handlers)->BOOL
+	namespace Functions
+	{
+		namespace ResizeFunctions
 		{
-
-
-
-
-			return EXIT_SUCCESS; 
+			extern std::function<BOOL(int w, int h, void* handlers)> L1;
 		}
-	);
+	}
 }

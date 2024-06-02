@@ -7,6 +7,7 @@
 
 namespace DeclarativeClasses
 {
+typedef std::function<BOOL(int, int, void*)> RESIZE_FUNCTION;
 class AForm
 {
 public:

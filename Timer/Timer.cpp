@@ -6,6 +6,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "framework.h"
+#pragma comment(lib, "comctl32.lib")
 #include "Timer.h"
 #include <math.h>
 #include <stdexcept>
@@ -25,7 +26,6 @@ WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки за�
 WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса главного окна
 
 // Отправить объявления функций, включенных в этот модуль кода:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
@@ -40,6 +40,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::Form form;
 
+RECT windiowRect;
 
 
 
@@ -61,7 +62,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Инициализация глобальных строк
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_TIMER, szWindowClass, MAX_LOADSTRING);
-    MyRegisterClass(hInstance);
+
+    WNDCLASSEXW wcex{ NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL };
+
+    wcex.cbSize = sizeof(WNDCLASSEX);
+
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_TIMER);
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON1));
+
+    RegisterClassExW(&wcex);
+
 
     // Выполнить инициализацию приложения:
     if (!InitInstance (hInstance, nCmdShow))
@@ -93,26 +112,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //
 //  ЦЕЛЬ: Регистрирует класс окна.
 //
-ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-    WNDCLASSEXW wcex{NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TIMER));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_TIMER);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
-}
 
 //
 //   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
@@ -158,7 +157,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
     {
-        form.SetNewSize(IDS_DEFAULT_WINDOW_WIDTH, IDS_DEFAULT_WINDOW_HEIGHT);
+        GetClientRect(hWnd, &windiowRect);
+
+
+        HWND button = CreateWindowExA
+        (
+            0L,
+            "button",
+            "Добавить",
+            WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
+            0, windiowRect.bottom-110,
+            60, 110,
+            hWnd, NULL, NULL, NULL
+        );
+        LOGFONT lf;
+        lf.lfHeight = 10;
+        SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+        HFONT hFont = CreateFontIndirect(&lf);
+        SendMessage(button, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+
+
+
+        /*HWND leftListView = CreateWindowExA
+        (
+            0L,
+            "list"
+        )*/
+
+
+
+        form.AddItem("buttons","Add",&button);
+        form.SetNewSize(windiowRect.right, windiowRect.bottom);
+        form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
         try
         {
             form.Resize();
@@ -190,9 +221,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_SIZE:
     {
-        form.SetNewSize(LOWORD(lParam),HIWORD(lParam));
         try
         {
+            GetClientRect(hWnd, &windiowRect);
+            form.SetNewSize(windiowRect.right, windiowRect.bottom);
             form.Resize();
         }
         catch (std::exception&)
