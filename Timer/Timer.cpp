@@ -40,7 +40,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::Form form;
 
-RECT windiowRect;
+RECT windowRect;
 
 
 
@@ -157,7 +157,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
     {
-        GetClientRect(hWnd, &windiowRect);
+        GetClientRect(hWnd, &windowRect);
 
 
         HWND button = CreateWindowExA
@@ -166,7 +166,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             "button",
             "Добавить",
             WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
-            0, windiowRect.bottom-110,
+            0, windowRect.bottom-110,
             60, 110,
             hWnd, NULL, NULL, NULL
         );
@@ -179,16 +179,89 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-        /*HWND leftListView = CreateWindowExA
+
+
+
+
+        HWND hWndListView1 = CreateWindowEx
         (
-            0L,
-            "list"
-        )*/
+            0,
+            WC_LISTVIEW,
+            NULL,
+            WS_CHILD | WS_VISIBLE | LVS_REPORT,
+            60, windowRect.bottom - 110, windowRect.right / 2-60, 110,
+            hWnd,
+            (HMENU)1,
+            hInst,
+            NULL
+        );
+
+        // Создаем вторую ListView
+        HWND hWndListView2 = CreateWindowEx
+        (
+            0,
+            WC_LISTVIEW,
+            NULL,
+            WS_CHILD | WS_VISIBLE | LVS_REPORT,
+            windowRect.right/2,0, windowRect.right / 2, windowRect.bottom,
+            hWnd,
+            (HMENU)2,
+            hInst,
+            NULL
+        );
+
+        // Инициализация шрифтов и других параметров для ListView
+        LOGFONT lf2;
+        lf2.lfHeight = 10;
+        SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf2, 0);
+        HFONT hFont2 = CreateFontIndirect(&lf2);
+        SendMessage(hWndListView1, WM_SETFONT, (WPARAM)hFont2, TRUE);
+        SendMessage(hWndListView2, WM_SETFONT, (WPARAM)hFont2, TRUE);
+
+        // Добавляем столбцы в первую ListView
+        LVCOLUMN lvc;
+        lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
+        lvc.cx = 100;
+        lvc.pszText =(wchar_t*) L"Column 1";
+        ListView_InsertColumn(hWndListView1, 0, &lvc);
+        lvc.pszText = (wchar_t*)L"Column 2";
+        ListView_InsertColumn(hWndListView1, 1, &lvc);
+
+        // Добавляем столбцы во вторую ListView
+        lvc.pszText = (wchar_t*)L"Column A";
+        ListView_InsertColumn(hWndListView2, 0, &lvc);
+        lvc.pszText = (wchar_t*)L"Column B";
+        ListView_InsertColumn(hWndListView2, 1, &lvc);
+
+        // Пример добавления элементов в первую ListView
+        LVITEM lvi;
+        lvi.mask = LVIF_TEXT;
+        lvi.iItem = 0;
+        lvi.iSubItem = 0;
+        lvi.pszText = (wchar_t*)L"Item 1";
+        ListView_InsertItem(hWndListView1, &lvi);
+        lvi.iSubItem = 1;
+        lvi.pszText = (wchar_t*)L"SubItem 1.1";
+        ListView_SetItem(hWndListView1, &lvi);
+
+        // Пример добавления элементов во вторую ListView
+        lvi.iItem = 0;
+        lvi.iSubItem = 0;
+        lvi.pszText = (wchar_t*)L"Item A";
+        ListView_InsertItem(hWndListView2, &lvi);
+        lvi.iSubItem = 1;
+        lvi.pszText = (wchar_t*)L"SubItem A.1";
+        ListView_SetItem(hWndListView2, &lvi);
 
 
 
-        form.AddItem("buttons","Add",&button);
-        form.SetNewSize(windiowRect.right, windiowRect.bottom);
+
+
+
+        form.AddItem("buttons","add",&button);
+        form.AddItem("listViews", "addListView", &hWndListView1);
+        form.AddItem("listViews", "showListView", &hWndListView2);
+        form.SetNewSize(windowRect.right, windowRect.bottom);
         form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
         try
         {
@@ -200,6 +273,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DestroyWindow(hWnd);
         }
         
+
+
         break;
     }
     case WM_COMMAND:
@@ -223,8 +298,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         try
         {
-            GetClientRect(hWnd, &windiowRect);
-            form.SetNewSize(windiowRect.right, windiowRect.bottom);
+            GetClientRect(hWnd, &windowRect);
+            form.SetNewSize(windowRect.right, windowRect.bottom);
             form.Resize();
         }
         catch (std::exception&)
