@@ -39,7 +39,7 @@ void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 
 
-Clock clockObj(100, { 100+3,100 +3});
+Clock clockObj(100, { 100 + 3,100 + 3 });
 DeclarativeClasses::ControlForm form;
 
 RECT windowRect;
@@ -52,9 +52,9 @@ RECT windowRect;
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR    lpCmdLine,
+    _In_ int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -85,7 +85,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
     // Выполнить инициализацию приложения:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
@@ -104,7 +104,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
 
 
@@ -127,20 +127,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
+    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, IDS_DEFAULT_WINDOW_WIDTH, IDS_DEFAULT_WINDOW_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, IDS_DEFAULT_WINDOW_WIDTH, IDS_DEFAULT_WINDOW_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
-   return TRUE;
+    return TRUE;
 }
 
 //
@@ -162,13 +162,78 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         GetClientRect(hWnd, &windowRect);
 
 
+
+
+
+
+        // Инициализация ListView
+        HWND hWndListView = CreateWindow(WC_LISTVIEW,
+            L"",
+            WS_CHILD | LVS_REPORT | LVS_EDITLABELS | WS_VISIBLE,
+            0, 0, 100, 100,
+            hWnd,
+            (HMENU)3,
+            hInst,
+            NULL);
+
+        // Добавление столбцов
+        LVCOLUMN lvColumn;
+        lvColumn.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
+        lvColumn.cx = 100; // ширина столбца
+
+        // Заголовки столбцов
+        const wchar_t* columnTitles[4] = { L"Заголовок 1", L"Заголовок 2", L"Заголовок 3", L"Заголовок 4" };
+        for (int i = 0; i < 4; ++i) {
+            lvColumn.pszText = (LPWSTR)columnTitles[i];
+            ListView_InsertColumn(hWndListView, i, &lvColumn);
+        }
+
+        // Добавление элементов и подпредметов
+        LVITEM lvItem;
+        lvItem.mask = LVIF_TEXT;
+        lvItem.iSubItem = 0;
+        lvItem.iItem = 0;
+        lvItem.pszText = (wchar_t*)L"Элемент 1";
+        ListView_InsertItem(hWndListView, &lvItem);
+
+        ListView_SetItemText(hWndListView, 0, 1, (wchar_t*)L"Подпредмет 1");
+        ListView_SetItemText(hWndListView, 0, 2, (wchar_t*)L"Подпредмет 2");
+        ListView_SetItemText(hWndListView, 0, 3, (wchar_t*)L"Подпредмет 3");
+        LVITEM lvItem2;
+        lvItem2.mask = LVIF_TEXT;
+        lvItem2.iItem = 1; // индекс строки
+        lvItem2.iSubItem = 0; // индекс подпредмета
+        lvItem2.pszText = (wchar_t*)L"Новый элемент";
+        ListView_InsertItem(hWndListView, &lvItem2);
+
+        // Добавление подпредметов для новой строки
+        ListView_SetItemText(hWndListView, 1, 1, (wchar_t*)L"Подпредмет 1");
+        ListView_SetItemText(hWndListView, 1, 2, (wchar_t*)L"Подпредмет 2");
+        ListView_SetItemText(hWndListView, 1, 3, (wchar_t*)L"Подпредмет 3");
+
+        // Делаем первую ячейку редактируемой
+        ListView_EditLabel(hWndListView, 1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         HWND button = CreateWindowExA
         (
             0L,
             "button",
             "Добавить",
             WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
-            0, windowRect.bottom-110,
+            0, windowRect.bottom - 110,
             60, 110,
             hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
         );
@@ -190,8 +255,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             WS_EX_CLIENTEDGE,
             WC_LISTVIEW,
             NULL,
-            WS_CHILD | WS_VISIBLE | LVS_REPORT,
-            60, windowRect.bottom - 110, windowRect.right / 2-60, 110,
+            WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_EDITLABELS,
+            60, windowRect.bottom - 110, windowRect.right / 2 - 60, 110,
             hWnd,
             (HMENU)1,
             hInst,
@@ -204,8 +269,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             WS_EX_CLIENTEDGE,
             WC_LISTVIEW,
             NULL,
-            WS_CHILD | WS_VISIBLE | LVS_REPORT,
-            windowRect.right/2,0, windowRect.right / 2, windowRect.bottom,
+            WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_EDITLABELS,
+            windowRect.right / 2, 0, windowRect.right / 2, windowRect.bottom,
             hWnd,
             (HMENU)2,
             hInst,
@@ -224,7 +289,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         LVCOLUMN lvc;
         lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
         lvc.cx = 100;
-        lvc.pszText =(wchar_t*) L"Column 1";
+        lvc.pszText = (wchar_t*)L"Column 1";
         ListView_InsertColumn(hWndListView1, 0, &lvc);
         lvc.pszText = (wchar_t*)L"Column 2";
         ListView_InsertColumn(hWndListView1, 1, &lvc);
@@ -264,7 +329,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-        form.AddItem("buttons","add",&button);
+        form.AddItem("buttons", "add", &button);
         form.AddItem("listViews", "addListView", &hWndListView1);
         form.AddItem("listViews", "showListView", &hWndListView2);
         form.SetNewSize(windowRect.right, windowRect.bottom);
@@ -278,7 +343,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
             DestroyWindow(hWnd);
         }
-        
+
 
 
         break;
@@ -332,36 +397,61 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
-        RECT windowRect; 
+        RECT windowRect;
         GetClientRect(hWnd, &windowRect);
         HDC hdc = BeginPaint(hWnd, &ps);
-            
+
 
         clockObj.SetWindowHandle(&hWnd);
         clockObj.StartUpdateThread();
         HDC memDC = CreateCompatibleDC(hdc);
-        HBITMAP memBM = 
-            CreateCompatibleBitmap(hdc, 
-                clockObj.GetRect().right - clockObj.GetRect().left+6, 
-                clockObj.GetRect().bottom - clockObj.GetRect().top+6);
+        HBITMAP memBM =
+            CreateCompatibleBitmap(hdc,
+                clockObj.GetRect().right - clockObj.GetRect().left + 6,
+                clockObj.GetRect().bottom - clockObj.GetRect().top + 6);
         SelectObject(memDC, memBM);
 
         // Рисуем на внутреннем буфере
         clockObj.Draw(&memDC);
 
         // Копируем внутренний буфер на экран
-        BitBlt(hdc, 15, 15, 
-            clockObj.GetRect().right - clockObj.GetRect().left+6, 
-            clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
+        BitBlt(hdc, 15, 15,
+            clockObj.GetRect().right - clockObj.GetRect().left + 6,
+            clockObj.GetRect().bottom - clockObj.GetRect().top + 6, memDC, 0, 0, SRCCOPY);
 
         // Освобождаем ресурсы
         DeleteObject(memBM);
         DeleteDC(memDC);
 
-            
+
         EndPaint(hWnd, &ps);
         break;
     }
+    case WM_NOTIFY:
+    {
+        LPNMHDR lpnmh = (LPNMHDR)lParam;
+        if (lpnmh->idFrom == 3 && lpnmh->code == LVN_BEGINLABELEDIT)
+        {
+            NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)lParam;
+            // Здесь можно добавить код для настройки редактирования
+            // Например, получить дескриптор элемента управления Edit
+            HWND hEdit = ListView_GetEditControl(lpnmh->hwndFrom);
+            // Дополнительная настройка hEdit, если необходимо
+            return FALSE; // Разрешить редактирование
+        }
+        else if (lpnmh->idFrom == 3 && lpnmh->code == LVN_ENDLABELEDIT)
+        {
+            NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)lParam;
+            if (pDispInfo->item.pszText != NULL)
+            {
+                // Обновить данные в ListView
+                ListView_SetItemText(lpnmh->hwndFrom, pDispInfo->item.iItem, pDispInfo->item.iSubItem, pDispInfo->item.pszText);
+            }
+            return TRUE; // Принять изменения
+        }
+        break;
+    }
+
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
