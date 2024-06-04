@@ -60,5 +60,24 @@ LRESULT ControlForm::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARA
 {
 	return _messageHandler(hWnd, message, wParam, lParam,Form::GetHandlers());
 }
+HWND ControlForm::GetItem(std::string group, std::string name)
+{
+	try
+	{
+		return std::find_if
+		(
+			Form::GetHandlers().at(group).begin(),
+			Form::GetHandlers().at(group).end(),
+			[&name](const std::pair<std::string,HWND>& pair)->bool
+			{
+				return pair.first == name;
+			}
+		)->second;
+	}
+	catch (const std::exception&)
+	{
+		return nullptr;
+	}
+}
 }
 

@@ -44,6 +44,7 @@ public:
 	~ControlForm();
 #pragma endregion
 	LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	HWND GetItem(std::string group, std::string name);
 
 private:
 	std::function<LRESULT(HWND, UINT, WPARAM, LPARAM,const HANDLER_CONTAINER&)> _messageHandler =

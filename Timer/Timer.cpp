@@ -32,13 +32,15 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 
+std::wstring GetAllListViewItems(HWND hwndListView);
+void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 
 
 
 
 Clock clockObj(100, { 100+3,100 +3});
-DeclarativeClasses::Form form;
+DeclarativeClasses::ControlForm form;
 
 RECT windowRect;
 
@@ -168,7 +170,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
             0, windowRect.bottom-110,
             60, 110,
-            hWnd, NULL, NULL, NULL
+            hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
         );
         LOGFONT lf;
         lf.lfHeight = 10;
@@ -185,7 +187,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         HWND hWndListView1 = CreateWindowEx
         (
-            0,
+            WS_EX_CLIENTEDGE,
             WC_LISTVIEW,
             NULL,
             WS_CHILD | WS_VISIBLE | LVS_REPORT,
@@ -199,7 +201,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // Создаем вторую ListView
         HWND hWndListView2 = CreateWindowEx
         (
-            0,
+            WS_EX_CLIENTEDGE,
             WC_LISTVIEW,
             NULL,
             WS_CHILD | WS_VISIBLE | LVS_REPORT,
@@ -255,6 +257,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
+        ListView_SetOutlineColor(hWndListView1, RGB(255, 0, 0));
+        ListView_SetOutlineColor(hWndListView2, RGB(255, 0, 0));
+
+
 
 
 
@@ -283,6 +289,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // Разобрать выбор в меню:
         switch (wmId)
         {
+        case IDS_ADD_BUTTON:
+        {
+            std::wstring items = GetAllListViewItems(form.GetItem("listViews", "addListView"));
+            MessageBoxW(hWnd, items.c_str(), L"Items in ListView 1", MB_OK);
+            break;
+        }
         case IDM_ABOUT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
             break;
@@ -377,4 +389,38 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+
+
+
+
+
+
+
+std::wstring GetAllListViewItems(HWND hwndListView)
+{
+    int itemCount = ListView_GetItemCount(hwndListView);
+    int columnCount = Header_GetItemCount(ListView_GetHeader(hwndListView));
+    std::wstring allItems;
+    wchar_t itemText[256];
+
+    for (int i = 0; i < itemCount; ++i)
+    {
+        for (int j = 0; j < columnCount; ++j)
+        {
+            itemText[0] = L'\0';
+            ListView_GetItemText(hwndListView, i, j, itemText, 256);
+            allItems += itemText;
+            allItems += L"\t"; // Добавляем символ табуляции между элементами колонки
+        }
+        allItems += L"\n"; // Добавляем символ новой строки после каждой строки
+    }
+    return allItems;
+}
+
+void SetMinColumnWidth(NMHDR* pnmh, int minWidth)
+{
+    HD_NOTIFY* phdn = (HD_NOTIFY*)pnmh;
+    phdn->pitem->cxy = minWidth;
 }

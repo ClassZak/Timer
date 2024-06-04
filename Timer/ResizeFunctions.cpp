@@ -21,7 +21,7 @@ namespace DeclarativeClasses
 						(
 							realHandlers->at("buttons").begin(),
 							realHandlers->at("buttons").end(),
-							[](std::pair<std::string, HWND>& pair)->bool
+							[](const std::pair<std::string, HWND>& pair)->bool
 							{
 								return pair.first == "add";
 							}
@@ -45,7 +45,7 @@ namespace DeclarativeClasses
 						(
 							realHandlers->at("listViews").begin(),
 							realHandlers->at("listViews").end(),
-							[](std::pair<std::string, HWND>& pair)->bool
+							[](const std::pair<std::string, HWND>& pair)->bool
 							{
 								return pair.first == "addListView";
 							}
@@ -57,8 +57,8 @@ namespace DeclarativeClasses
 						MoveWindow
 						(
 							addListView,
-							addListViewRECT.left, addListViewRECT.top,
-							w / 2 - addListViewRECT.left, h - addListViewRECT.top, FALSE
+							addListViewRECT.left-2, addListViewRECT.top-2,
+							w / 2 - addListViewRECT.left+2, h - addListViewRECT.top+2, FALSE
 						);
 					}
 					{
@@ -66,7 +66,7 @@ namespace DeclarativeClasses
 						(
 							realHandlers->at("listViews").begin(),
 							realHandlers->at("listViews").end(),
-							[](std::pair<std::string, HWND>& pair)->bool
+							[](const std::pair<std::string, HWND>& pair)->bool
 							{
 								return pair.first == "showListView";
 							}
@@ -78,8 +78,8 @@ namespace DeclarativeClasses
 						MoveWindow
 						(
 							showListView,
-							w / 2, showListViewRECT.top,
-							w / 2, h - showListViewRECT.top, FALSE
+							w / 2, showListViewRECT.top-2,
+							w / 2, h - showListViewRECT.top+2, FALSE
 						);
 					}
 					

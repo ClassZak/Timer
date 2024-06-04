@@ -100,7 +100,7 @@ bool Form::RemoveItem(std::string group, std::string name)
 				(
 					_handlers.at(group).begin(),
 					_handlers.at(group).end(),
-					[&name](std::pair<std::string, HWND> pair)-> bool
+					[&name](const std::pair<std::string, HWND>& pair)-> bool
 					{
 						return pair.first == name;
 					}
