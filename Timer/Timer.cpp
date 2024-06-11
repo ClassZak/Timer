@@ -29,11 +29,11 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса глав�
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
+LRESULT CALLBACK    ListViewSubclassProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR IdSubclass, DWORD_PTR RefData);
+LRESULT CALLBACK    TempListViewEditorProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR IdSubclass, DWORD_PTR RefData);
 
 
 std::wstring GetAllListViewItems(HWND hwndListView);
-void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 
 
@@ -43,7 +43,14 @@ Clock clockObj(100, { 100 + 3,100 + 3 });
 DeclarativeClasses::ControlForm form;
 
 RECT windowRect;
+HWND buttonTableEdit;
 
+
+#pragma region Table elements
+CONST HMENU TEMP_BUTTON_ID = (HMENU)5000;
+CONST HMENU LISTVIEW_LEFT_ID = (HMENU)2000;
+BOOL TempEditorEnabled = FALSE;
+#pragma endregion
 
 
 
@@ -394,6 +401,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
         break;
     }
+    case WM_KEYDOWN:
+    {
+        /*
+        if (wParam == VK_RETURN)
+        {
+            // Получаем текст из Edit
+            wchar_t szText[256];
+            GetWindowText(hWnd, szText, 256);
+
+            // Получаем индекс выбранного элемента и подпредмета
+            int iItem = ...; // Здесь должен быть код для получения индекса элемента
+            int iSubItem = ...; // Здесь должен быть код для получения индекса подпредмета
+
+            // Обновляем текст в ListView
+            ListView_SetItemText(GetParent(hWnd), iItem, iSubItem, szText);
+
+            // Закрываем Edit
+            DestroyWindow(hWnd);
+        }
+        else if (wParam == VK_ESCAPE)
+        {
+            // Закрываем Edit без сохранения изменений
+            DestroyWindow(hWnd);
+        }
+        break;*/
+    }
+   
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
@@ -429,28 +463,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_NOTIFY:
     {
-        LPNMHDR lpnmh = (LPNMHDR)lParam;
-        if (lpnmh->idFrom == 3 && lpnmh->code == LVN_BEGINLABELEDIT)
+        LPNMITEMACTIVATE lpnmitem = (LPNMITEMACTIVATE)lParam;
+        if (lpnmitem->hdr.code == NM_DBLCLK)
         {
-            NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)lParam;
-            // Здесь можно добавить код для настройки редактирования
-            // Например, получить дескриптор элемента управления Edit
-            HWND hEdit = ListView_GetEditControl(lpnmh->hwndFrom);
-            // Дополнительная настройка hEdit, если необходимо
-            return FALSE; // Разрешить редактирование
-        }
-        else if (lpnmh->idFrom == 3 && lpnmh->code == LVN_ENDLABELEDIT)
-        {
-            NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)lParam;
-            if (pDispInfo->item.pszText != NULL)
-            {
-                // Обновить данные в ListView
-                ListView_SetItemText(lpnmh->hwndFrom, pDispInfo->item.iItem, pDispInfo->item.iSubItem, pDispInfo->item.pszText);
-            }
-            return TRUE; // Принять изменения
+            // Получаем координаты ячейки
+            LVHITTESTINFO hitTestInfo = { 0 };
+            hitTestInfo.pt = lpnmitem->ptAction;
+            ListView_SubItemHitTest(lpnmitem->hdr.hwndFrom, &hitTestInfo);
+
+            // Создаем элемент управления Edit
+            RECT rcSubItem;
+            ListView_GetSubItemRect(lpnmitem->hdr.hwndFrom, hitTestInfo.iItem, hitTestInfo.iSubItem, LVIR_BOUNDS, &rcSubItem);
+            HWND hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+                rcSubItem.left, rcSubItem.top, rcSubItem.right - rcSubItem.left, rcSubItem.bottom - rcSubItem.top,
+                lpnmitem->hdr.hwndFrom, (HMENU)45, GetModuleHandle(NULL), NULL);
+
+            // Настраиваем и показываем элемент управления Edit
+            SendMessage(hEdit, WM_SETFONT, (WPARAM)GetStockObject(DEFAULT_GUI_FONT), MAKELPARAM(TRUE, 0));
+            SetFocus(hEdit);
+
+            // Обработка завершения редактирования
+            // ...
         }
         break;
     }
+    
+
 
     case WM_DESTROY:
         PostQuitMessage(0);
@@ -509,8 +547,77 @@ std::wstring GetAllListViewItems(HWND hwndListView)
     return allItems;
 }
 
-void SetMinColumnWidth(NMHDR* pnmh, int minWidth)
+
+
+#pragma region Subitems' processes
+LRESULT ListViewSubclassProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR IdSubclass, DWORD_PTR RefData)
 {
-    HD_NOTIFY* phdn = (HD_NOTIFY*)pnmh;
-    phdn->pitem->cxy = minWidth;
+    switch(message)
+    {
+        case WM_HSCROLL:
+        case WM_VSCROLL:
+        {
+            if (GetFocus() == GetDlgItem(GetParent(hWnd), 5000))
+                SetFocus(hWnd);
+            break;
+        }
+        case WM_NCDESTROY:
+        {
+            ::RemoveWindowSubclass(hWnd, ListViewSubclassProc, IdSubclass);
+            break;
+        }
+    }
+
+    return DefSubclassProc(hWnd,message,wParam,lParam);
 }
+LRESULT TempListViewEditorProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR IdSubclass, DWORD_PTR RefData)
+{
+    switch (message)
+    {
+        case WM_GETDLGCODE:
+        {
+            return (DLGC_WANTALLKEYS | DefSubclassProc(hWnd, message, wParam, lParam));
+        }
+        case WM_KILLFOCUS:
+        {
+            TempEditorEnabled = FALSE;
+            ShowWindow(hWnd, SW_HIDE);
+            break;
+        }
+        case WM_CHAR:
+        {
+            switch (wParam)
+            {
+                case VK_RETURN:
+                case VK_ESCAPE:
+                {
+                    return 0L;
+                }
+            }
+            break;
+        }
+        case WM_KEYDOWN:
+        {
+            switch (wParam)
+            {
+                case VK_RETURN:
+                {
+                    HWND hWndLV = GetDlgItem(GetParent(hWnd), (int)LISTVIEW_LEFT_ID);
+
+                    RECT rc{0,0,0,0};
+                    GetClientRect(hWnd, &rc);
+
+                    MapWindowPoints(hWnd, hWndLV, (LPPOINT)&rc, (sizeof(RECT) / sizeof(POINT)));
+                    LVHITTESTINFO lvhti{};
+                    lvhti.pt.x = rc.left;
+                    lvhti.pt.y = rc.top;
+
+                    //List
+                }
+            }
+        }
+    }
+
+    return DefSubclassProc(hWnd, message, wParam, lParam);
+}
+#pragma endregion
