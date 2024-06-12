@@ -133,10 +133,12 @@
     <ClInclude Include="Circle.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="ControlForm.h" />
+    <ClInclude Include="CreateWindowArgs.h" />
     <ClInclude Include="Form.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="ResizeFunctions.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Table.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Types.h" />
@@ -147,6 +149,7 @@
     <ClCompile Include="ControlForm.cpp" />
     <ClCompile Include="Form.cpp" />
     <ClCompile Include="ResizeFunctions.cpp" />
+    <ClCompile Include="Table.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>

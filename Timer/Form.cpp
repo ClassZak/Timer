@@ -117,7 +117,7 @@ void Form::Clear()
 {
 	_handlers.clear();
 }
-const HANDLER_CONTAINER& Form::GetHandlers()const
+HANDLER_CONTAINER& Form::GetHandlers()
 {
 	return _handlers;
 }

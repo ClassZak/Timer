@@ -49,6 +49,12 @@
     <Filter Include="Файлы заголовков\DeclarativeClasses\TypeDefs">
       <UniqueIdentifier>{0a7d2da8-9254-49e8-baaa-9f3e6c219806}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\DeclarativeClasses\Table">
+      <UniqueIdentifier>{5434a3fb-c53b-4b29-a33c-ac027b5e081d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\DeclarativeClasses\Table">
+      <UniqueIdentifier>{d98aeead-8e75-4bd9-a5bb-ecdac6c5af50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -84,6 +90,12 @@
     <ClInclude Include="Types.h">
       <Filter>Файлы заголовков\DeclarativeClasses\TypeDefs</Filter>
     </ClInclude>
+    <ClInclude Include="Table.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="CreateWindowArgs.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer.cpp">
@@ -103,6 +115,9 @@
     </ClCompile>
     <ClCompile Include="ResizeFunctions.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
+    </ClCompile>
+    <ClCompile Include="Table.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

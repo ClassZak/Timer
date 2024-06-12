@@ -41,24 +41,25 @@ namespace DeclarativeClasses
 
 
 					{
-						HWND addListView = std::find_if
+						HWND addTable = std::find_if
 						(
-							realHandlers->at("listViews").begin(),
-							realHandlers->at("listViews").end(),
+							realHandlers->at("tables").begin(),
+							realHandlers->at("tables").end(),
 							[](const std::pair<std::string, HWND>& pair)->bool
 							{
-								return pair.first == "addListView";
+								return pair.first == "addTable";
 							}
 						)->second;
-						RECT addListViewRECT;
-						GetClientRect(addListView, &addListViewRECT);
-						MapWindowPoints(addListView, GetParent(addListView), (LPPOINT)(&addListViewRECT), 2);
+						RECT addTableRect;
+						GetClientRect(addTable, &addTableRect);
+						MapWindowPoints(addTable, GetParent(addTable), (LPPOINT)(&addTableRect), 2);
 
 						MoveWindow
 						(
-							addListView,
-							addListViewRECT.left-2, addListViewRECT.top-2,
-							w / 2 - addListViewRECT.left+2, h - addListViewRECT.top+2, FALSE
+							addTable,
+							addTableRect.left, addTableRect.top,
+							w / 2 - addTableRect.left, h - addTableRect.top,
+							FALSE
 						);
 					}
 					{

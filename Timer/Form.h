@@ -64,7 +64,7 @@ private:
 		return EXIT_FAILURE;
 	};
 protected:
-	const HANDLER_CONTAINER& GetHandlers()const;
+	HANDLER_CONTAINER& GetHandlers();
 };
 }
 
