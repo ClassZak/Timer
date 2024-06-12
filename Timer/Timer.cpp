@@ -239,7 +239,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		WNDCLASSEXW wcTable{};
 		wcTable.cbSize = sizeof(WNDCLASSEX);
-		wcTable.lpfnWndProc = table.Proc;
+		wcTable.lpfnWndProc = &(table.WindowProc);
 		wcTable.cbClsExtra = 0;
 		wcTable.cbWndExtra = 0;
 		wcTable.hInstance = hInst;
@@ -262,12 +262,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			hWnd,
 			NULL,
 			hInst,
-			NULL 
+			&table 
 		});
 
 		
 
-		form.AddItem("tables","addTable", &table.GetWindow());
+		form.AddItem("tables","addTable", &table.GetWindowHandler());
 		form.AddItem("buttons","add",&button);
 		form.AddItem("listViews", "showListView", &hWndListView2);
 		form.SetNewSize(windowRect.right, windowRect.bottom);

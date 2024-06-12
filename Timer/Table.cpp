@@ -58,9 +58,14 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 
 }
 
-const HWND& Table::GetWindow()
+const HWND& Table::GetWindowHandler()
 {
 	return _thisWindow;
+}
+
+void Table::SetWindowHandler(HWND hwnd)
+{
+	_thisWindow = hwnd;
 }
 
 
@@ -77,6 +82,7 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
 }
 
 

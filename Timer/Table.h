@@ -39,13 +39,40 @@ public:
 #pragma endregion
 	~Table()=default;
 #pragma endregion
-	static LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM);
+	LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM);
+	
+	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	{
+		DeclarativeClasses::Table* pThis = NULL;
+
+		if (msg == WM_NCCREATE)
+		{
+			CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
+			pThis = (DeclarativeClasses::Table*)pCreate->lpCreateParams;
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pThis);
+
+			pThis->SetWindowHandler(hWnd);
+		}
+		else
+		{
+			pThis = (DeclarativeClasses::Table*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+		}
+		if (pThis)
+		{
+			return pThis->Proc(pThis->GetWindowHandler(),msg, wParam, lParam);
+		}
+		else
+		{
+			return DefWindowProc(hWnd, msg, wParam, lParam);
+		}
+	}
 
 	void CreateSelf(const WNDCLASSEXW* wClass,const CreateWindowArgs& args);
 	void CreateSelf(const CreateWindowArgs& args);
 
 
-	const HWND& GetWindow();
+	const HWND& GetWindowHandler();
+	void SetWindowHandler(HWND hwnd);
 protected:
 	HWND _thisWindow{};
 };
