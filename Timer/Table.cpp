@@ -39,6 +39,11 @@ void Table::CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)
 }
 void Table::CreateSelf(const CreateWindowArgs& args)
 {
+	_x = args.X;
+	_y = args.Y;
+	_width = args.nWidth;
+	_height = args.nHeight;
+
 	_thisWindow =
 	CreateWindowExW
 	(
@@ -53,9 +58,36 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 		args.hInstance, 
 		args.lpParam
 	);
+	_horScrollBar =
+	CreateWindowExW
+	(
+		0L,
+		L"SCROLLBAR",
+		L"",
+		SBS_HORZ | WS_VISIBLE | WS_CHILD,
+		0,args.nHeight-20,
+		args.nWidth-20,20,
+		_thisWindow,
+		NULL,
+		args.hInstance,
+		this
+	);
+	_vertScrollBar =
+	CreateWindowExW
+	(
+		0L,
+		L"SCROLLBAR",
+		L"",
+		SBS_VERT | WS_VISIBLE | WS_CHILD,
+		args.nWidth-20,0,
+		20,args.nHeight-20,
+		_thisWindow,
+		NULL,
+		args.hInstance,
+		this
+	);
 	
 	HANDLER_CONTAINER* handlers = &Form::GetHandlers();
-
 }
 
 const HWND& Table::GetWindowHandler()
@@ -69,6 +101,24 @@ void Table::SetWindowHandler(HWND hwnd)
 }
 
 
+void Table::ResizeScrollBars()
+{
+	RECT hR
+	{
+		0,_height - 20,
+		_width - 20,20
+	},
+	vR
+	{
+		_width - 20,0,
+		20,_height - 20
+	};
+
+	MoveWindow(_horScrollBar, hR.left, hR.top, hR.right, hR.bottom, TRUE);
+	MoveWindow(_vertScrollBar, vR.left, vR.top, vR.right, vR.bottom, TRUE);
+}
+
+
 LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -76,6 +126,44 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_CREATE:
 		{
 			
+			break;
+		}
+		case WM_VSCROLL:
+		{
+
+			break;
+		}
+		case WM_HSCROLL:
+		{
+
+			break;
+		}
+		case WM_SIZE:
+		{
+			RECT r{};
+			GetClientRect(hWnd, &r);
+			SetNewSize(r.right, r.bottom);
+
+			ResizeScrollBars();
+			break;
+		}
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps{};
+			HDC hdc = BeginPaint(hWnd, &ps);
+			if (this)
+			{
+				RECT r{ _width - 20,_height - 20,_width,_height };
+				HBRUSH brush = CreateSolidBrush(RGB(240, 240, 240));
+
+				HGDIOBJ oldBrush = SelectObject(hdc,brush);
+				FillRect(hdc, &r, brush);
+
+				DeleteObject(brush);
+				SelectObject(hdc, oldBrush);
+			}
+
+			EndPaint(hWnd,&ps);
 			break;
 		}
 	}

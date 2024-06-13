@@ -54,7 +54,7 @@ public:
 	void Clear();
 private:
 	HANDLER_CONTAINER _handlers{};
-	int _width = 0, _height = 0;
+	
 	/// <summary>
 	/// Функция для управления размерами объектов
 	/// </summary>
@@ -65,6 +65,9 @@ private:
 	};
 protected:
 	HANDLER_CONTAINER& GetHandlers();
+
+	int _width = 0, _height = 0;
+	int _x = 0; int _y = 0;
 };
 }
 

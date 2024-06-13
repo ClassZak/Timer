@@ -256,7 +256,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			0,
 			L"Table",
 			L"t1",
-			WS_VISIBLE | WS_CHILD | WS_HSCROLL | WS_VSCROLL,
+			WS_VISIBLE | WS_CHILD,
 			60, windowRect.bottom - 110,
 			windowRect.right / 2 - 60, 110,
 			hWnd,

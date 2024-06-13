@@ -75,6 +75,10 @@ public:
 	void SetWindowHandler(HWND hwnd);
 protected:
 	HWND _thisWindow{};
+	HWND _horScrollBar{};
+	HWND _vertScrollBar{};
+
+	void ResizeScrollBars();
 };
 }
 
