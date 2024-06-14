@@ -294,8 +294,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case IDS_ADD_BUTTON:
 		{
-			std::wstring items = GetAllListViewItems(form.GetItem("listViews", "addListView"));
-			MessageBoxW(hWnd, items.c_str(), L"Items in ListView 1", MB_OK);
+
 			break;
 		}
 		case IDM_ABOUT:

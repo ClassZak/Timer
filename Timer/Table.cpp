@@ -14,7 +14,8 @@ Table::Table(int w, int h, HANDLER_CONTAINER handlers) : ControlForm(w,h, handle
 Table::Table(std::function<BOOL(int, int, void*)>& function) : ControlForm(function)
 {
 }
-Table::Table(HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function) : ControlForm(handlers, function)
+Table::Table(HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
+	: ControlForm(handlers, function)
 {
 }
 Table::Table(int w, int h, HANDLER_CONTAINER handles, std::function<BOOL(int, int, void*)>& function)
@@ -58,15 +59,48 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 		args.hInstance, 
 		args.lpParam
 	);
+
+	HANDLER_CONTAINER* handlers = &Form::GetHandlers();
+	for (int i = 0; i != 5; ++i)
+		for (int j = 0; j != 5; ++j)
+		{
+			{
+				int id = 5 * i + j;
+				HWND edit =
+				CreateWindowExW
+				(
+					0L,
+					L"edit",
+					(std::to_wstring(i) + L" " + std::to_wstring(j)).c_str(),
+					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+					60 * i, 20 * j,
+					60, 20,
+					_thisWindow,
+					(HMENU)id,
+					args.hInstance,
+					NULL
+				);
+
+
+				Form::AddItem
+				(
+					"textbox",
+					std::to_string(i) + " " + std::to_string(j),
+					&edit
+				);
+			}
+
+		}
+
 	_horScrollBar =
 	CreateWindowExW
 	(
-		0L,
+		WS_EX_TOPMOST,
 		L"SCROLLBAR",
 		L"",
 		SBS_HORZ | WS_VISIBLE | WS_CHILD,
-		0,args.nHeight-20,
-		args.nWidth-20,20,
+		0, args.nHeight - 20,
+		args.nWidth - 20, 20,
 		_thisWindow,
 		NULL,
 		args.hInstance,
@@ -75,19 +109,22 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 	_vertScrollBar =
 	CreateWindowExW
 	(
-		0L,
+		WS_EX_TOPMOST,
 		L"SCROLLBAR",
 		L"",
 		SBS_VERT | WS_VISIBLE | WS_CHILD,
-		args.nWidth-20,0,
-		20,args.nHeight-20,
+		args.nWidth - 20, 0,
+		20, args.nHeight - 20,
 		_thisWindow,
 		NULL,
 		args.hInstance,
 		this
 	);
-	
-	HANDLER_CONTAINER* handlers = &Form::GetHandlers();
+
+
+	SetWindowPos(_horScrollBar, HWND_TOPMOST, 0, args.nHeight - 20, args.nWidth - 20, 20, SWP_SHOWWINDOW);
+	SetWindowPos(_vertScrollBar, HWND_TOPMOST, args.nWidth - 20, 0, 20, args.nHeight - 20, SWP_SHOWWINDOW);
+
 }
 
 const HWND& Table::GetWindowHandler()
@@ -170,7 +207,6 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
-
 }
 
 
