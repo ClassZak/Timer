@@ -75,10 +75,16 @@ public:
 	void SetWindowHandler(HWND hwnd);
 protected:
 	HWND _thisWindow{};
+	HWND _tableView{};
 	HWND _horScrollBar{};
 	HWND _vertScrollBar{};
 
-	void ResizeScrollBars();
+	int vScrollbarPos = 0;
+	int hScrollbarPos = 0;
+	int maxVScrollbarPos = 1;
+	int maxHScrollbarPos = 1;
+	int minVScrollbarPos = 0;
+	int minHScrollbarPos = 0;
 };
 }
 

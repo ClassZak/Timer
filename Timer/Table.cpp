@@ -44,6 +44,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 	_y = args.Y;
 	_width = args.nWidth;
 	_height = args.nHeight;
+	HANDLER_CONTAINER* handlers = &Form::GetHandlers();
 
 	_thisWindow =
 	CreateWindowExW
@@ -60,71 +61,39 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 		args.lpParam
 	);
 
-	HANDLER_CONTAINER* handlers = &Form::GetHandlers();
-	for (int i = 0; i != 5; ++i)
-		for (int j = 0; j != 5; ++j)
+	
+	for (int i = 0; i != 15; ++i)
+		for (int j = 0; j !=40; ++j)
 		{
-			{
-				int id = 5 * i + j;
-				HWND edit =
-				CreateWindowExW
-				(
-					0L,
-					L"edit",
-					(std::to_wstring(i) + L" " + std::to_wstring(j)).c_str(),
-					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-					60 * i, 20 * j,
-					60, 20,
-					_thisWindow,
-					(HMENU)id,
-					args.hInstance,
-					NULL
-				);
+			int id = 40 * i + j;
+			HWND edit =
+			CreateWindowExW
+			(
+				0L,
+				L"edit",
+				(std::to_wstring(i) + L" " + std::to_wstring(j)).c_str(),
+				WS_CHILD | WS_VISIBLE | WS_BORDER,
+				40 * i, 15 * j,
+				40, 15,
+				_thisWindow,
+				(HMENU)id,
+				args.hInstance,
+				NULL
+			);
+			LOGFONT lf{};
+			lf.lfHeight = 12;
+			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+			HFONT hFont = CreateFontIndirect(&lf);
+			SendMessage(edit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 
-				Form::AddItem
-				(
-					"textbox",
-					std::to_string(i) + " " + std::to_string(j),
-					&edit
-				);
-			}
-
+			Form::AddItem
+			(
+				"textbox",
+				std::to_string(i) + " " + std::to_string(j),
+				&edit
+			);
 		}
-
-	_horScrollBar =
-	CreateWindowExW
-	(
-		WS_EX_TOPMOST,
-		L"SCROLLBAR",
-		L"",
-		SBS_HORZ | WS_VISIBLE | WS_CHILD,
-		0, args.nHeight - 20,
-		args.nWidth - 20, 20,
-		_thisWindow,
-		NULL,
-		args.hInstance,
-		this
-	);
-	_vertScrollBar =
-	CreateWindowExW
-	(
-		WS_EX_TOPMOST,
-		L"SCROLLBAR",
-		L"",
-		SBS_VERT | WS_VISIBLE | WS_CHILD,
-		args.nWidth - 20, 0,
-		20, args.nHeight - 20,
-		_thisWindow,
-		NULL,
-		args.hInstance,
-		this
-	);
-
-
-	SetWindowPos(_horScrollBar, HWND_TOPMOST, 0, args.nHeight - 20, args.nWidth - 20, 20, SWP_SHOWWINDOW);
-	SetWindowPos(_vertScrollBar, HWND_TOPMOST, args.nWidth - 20, 0, 20, args.nHeight - 20, SWP_SHOWWINDOW);
-
 }
 
 const HWND& Table::GetWindowHandler()
@@ -138,69 +107,190 @@ void Table::SetWindowHandler(HWND hwnd)
 }
 
 
-void Table::ResizeScrollBars()
-{
-	RECT hR
-	{
-		0,_height - 20,
-		_width - 20,20
-	},
-	vR
-	{
-		_width - 20,0,
-		20,_height - 20
-	};
-
-	MoveWindow(_horScrollBar, hR.left, hR.top, hR.right, hR.bottom, TRUE);
-	MoveWindow(_vertScrollBar, vR.left, vR.top, vR.right, vR.bottom, TRUE);
-}
-
-
 LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
 		case WM_CREATE:
 		{
-			
-			break;
-		}
-		case WM_VSCROLL:
-		{
+			BOOL r = ShowScrollBar(hWnd, SB_BOTH, TRUE);
+			r = SetScrollRange(hWnd, SB_HORZ, this->minHScrollbarPos, this->maxHScrollbarPos, TRUE);
+			r = SetScrollRange(hWnd, SB_VERT, this->minVScrollbarPos, this->maxVScrollbarPos, TRUE);
 
+			r = SetScrollPos(hWnd, SB_HORZ, this->hScrollbarPos, TRUE);
+			r = SetScrollPos(hWnd, SB_VERT, this->vScrollbarPos, TRUE);
 			break;
 		}
 		case WM_HSCROLL:
 		{
+			switch (LOWORD(wParam))
+			{
+				case SB_PAGERIGHT:
+				{
+					hScrollbarPos += 1;
+					break;
+				}
+				case SB_LINERIGHT:
+				{
+					hScrollbarPos += 1;
+					break;
+				}
 
+
+				case SB_PAGELEFT:
+				{
+					hScrollbarPos -= 1;
+					break;
+				}
+				case SB_LINELEFT:
+				{
+					hScrollbarPos -= 1;
+					break;
+				}
+
+
+				case SB_BOTTOM:
+				{
+					hScrollbarPos = maxVScrollbarPos;
+					break;
+				}
+				case SB_TOP:
+				{
+					hScrollbarPos = minVScrollbarPos;
+					break;
+				}
+
+
+				case SB_THUMBPOSITION:
+				case SB_THUMBTRACK:
+				{
+					hScrollbarPos = HIWORD(wParam);
+					break;
+				}
+			}
+
+			if (hScrollbarPos > maxHScrollbarPos)
+				hScrollbarPos = maxHScrollbarPos;
+			if (hScrollbarPos < minHScrollbarPos)
+				hScrollbarPos = minHScrollbarPos;
+			
+			SetScrollPos(hWnd, SB_HORZ, hScrollbarPos, TRUE);
+
+			RECT r{};
+			GetClientRect(hWnd, &r);
+			InvalidateRect(hWnd, &r, TRUE);
+			break;
+		}
+		case WM_VSCROLL:
+		{
+			switch (LOWORD(wParam))
+			{
+				case SB_PAGEUP:
+				{
+					vScrollbarPos -= 1;
+					break;
+				}
+				case SB_LINEUP:
+				{
+					vScrollbarPos -= 1;
+					break;
+				}
+
+
+				case SB_PAGEDOWN:
+				{
+					vScrollbarPos += 1;
+					break;
+				}
+				case SB_LINEDOWN:
+				{
+					vScrollbarPos += 1;
+					break;
+				}
+
+
+				case SB_TOP:
+				{
+					vScrollbarPos = maxVScrollbarPos;
+					break;
+				}
+				case SB_BOTTOM:
+				{
+					vScrollbarPos = minVScrollbarPos;
+					break;
+				}
+
+
+				case SB_THUMBPOSITION:
+				case SB_THUMBTRACK:
+				{
+					vScrollbarPos = HIWORD(wParam);
+					break;
+				}
+			}
+
+			if (vScrollbarPos > maxVScrollbarPos)
+				vScrollbarPos = maxVScrollbarPos;
+			if (vScrollbarPos < minVScrollbarPos)
+				vScrollbarPos = minVScrollbarPos;
+
+			SetScrollPos(hWnd, SB_VERT, vScrollbarPos, TRUE);
+
+			RECT r{};
+			GetClientRect(hWnd, &r);
+			InvalidateRect(hWnd, &r, TRUE);
 			break;
 		}
 		case WM_SIZE:
 		{
-			RECT r{};
-			GetClientRect(hWnd, &r);
-			SetNewSize(r.right, r.bottom);
+			RECT clientRect{};
+			GetClientRect(hWnd, &clientRect);
+			SetNewSize(clientRect.right, clientRect.bottom);
 
-			ResizeScrollBars();
+			int newWidth = LOWORD(lParam); // Новая ширина окна
+			int newHeight = HIWORD(lParam); // Новая высота окна
+
+
+			RECT windowRect{};
+			GetWindowRect(hWnd, &windowRect);
+
+
+			maxHScrollbarPos = (windowRect.right + windowRect.left) / clientRect.right;
+			maxVScrollbarPos = (windowRect.bottom + windowRect.top) / clientRect.bottom;
+
+
+
+
+			SCROLLINFO si{};
+			si.cbSize = sizeof(si);
+			si.fMask = SIF_PAGE;
+			si.nPage = (windowRect.bottom + windowRect.top) / clientRect.bottom / maxVScrollbarPos; // Установите размер ползунка равным 1/5 высоты окна
+			SetScrollInfo(hWnd, SB_VERT, &si, TRUE); // Обновите вертикальный ползунок
+
+			si.nPage = (windowRect.right + windowRect.left) / clientRect.right / maxHScrollbarPos; // Установите размер ползунка равным 1/5 ширины окна
+			SetScrollInfo(hWnd, SB_HORZ, &si, TRUE); // Обновите горизонтальный ползунок
+
+
+			BOOL succes=
+			SetScrollRange(hWnd, SB_HORZ, this->minHScrollbarPos, this->maxHScrollbarPos, TRUE);
+			succes=SetScrollRange(hWnd, SB_VERT, this->minVScrollbarPos, this->maxVScrollbarPos, TRUE);
+
+
+			succes = SetScrollPos(hWnd, SB_HORZ, this->hScrollbarPos, TRUE);
+			succes = SetScrollPos(hWnd, SB_VERT, this->vScrollbarPos, TRUE);
+
+			InvalidateRect(hWnd, &clientRect, TRUE);
 			break;
 		}
 		case WM_PAINT:
 		{
-			PAINTSTRUCT ps{};
-			HDC hdc = BeginPaint(hWnd, &ps);
 			if (this)
 			{
-				RECT r{ _width - 20,_height - 20,_width,_height };
-				HBRUSH brush = CreateSolidBrush(RGB(240, 240, 240));
+				PAINTSTRUCT ps{};
+				HDC hdc = BeginPaint(hWnd, &ps);
 
-				HGDIOBJ oldBrush = SelectObject(hdc,brush);
-				FillRect(hdc, &r, brush);
-
-				DeleteObject(brush);
-				SelectObject(hdc, oldBrush);
+				EndPaint(hWnd, &ps);
 			}
-
-			EndPaint(hWnd,&ps);
 			break;
 		}
 	}
