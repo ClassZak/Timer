@@ -42,7 +42,7 @@ void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::ControlForm form;
-DeclarativeClasses::Table table;
+DeclarativeClasses::Table table(4u,12u);
 
 RECT windowRect;
 
@@ -159,216 +159,227 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-	case WM_CREATE:
-	{
-		GetClientRect(hWnd, &windowRect);
+		case WM_CREATE:
+		{
+			GetClientRect(hWnd, &windowRect);
 
 
-		HWND button = CreateWindowExA
-		(
-			0L,
-			"button",
-			"Добавить",
-			WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
-			0, windowRect.bottom-110,
-			60, 110,
-			hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
-		);
-		LOGFONT lf{};
-		lf.lfHeight = 10;
-		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
-		HFONT hFont = CreateFontIndirect(&lf);
-		SendMessage(button, WM_SETFONT, (WPARAM)hFont, TRUE);
-
-
-
-
-
-
-		// Создаем вторую ListView
-		HWND hWndListView2 = CreateWindowEx
-		(
-			WS_EX_CLIENTEDGE,
-			WC_LISTVIEW,
-			NULL,
-			WS_CHILD | WS_VISIBLE | LVS_REPORT,
-			windowRect.right/2,0, windowRect.right / 2, windowRect.bottom,
-			hWnd,
-			(HMENU)2,
-			hInst,
-			NULL
-		);
-
-		// Инициализация шрифтов и других параметров для ListView
-		LOGFONT lf2{};
-		lf2.lfHeight = 10;
-		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf2, 0);
-		HFONT hFont2 = CreateFontIndirect(&lf2);
-		SendMessage(hWndListView2, WM_SETFONT, (WPARAM)hFont2, TRUE);
-
-		// Добавляем столбцы в первую ListView
-		LVCOLUMN lvc{};
-		lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
-		lvc.cx = 100;
-
-		// Добавляем столбцы во вторую ListView
-		lvc.pszText = (wchar_t*)L"Column A";
-		ListView_InsertColumn(hWndListView2, 0, &lvc);
-		lvc.pszText = (wchar_t*)L"Column B";
-		ListView_InsertColumn(hWndListView2, 1, &lvc);
-
-		// Пример добавления элементов в первую ListView
-		LVITEM lvi{};
-		lvi.mask = LVIF_TEXT;
-
-		// Пример добавления элементов во вторую ListView
-		lvi.iItem = 0;
-		lvi.iSubItem = 0;
-		lvi.pszText = (wchar_t*)L"Item A";
-		ListView_InsertItem(hWndListView2, &lvi);
-		lvi.iSubItem = 1;
-		lvi.pszText = (wchar_t*)L"SubItem A.1";
-		ListView_SetItem(hWndListView2, &lvi);
+			HWND button = CreateWindowExA
+			(
+				0L,
+				"button",
+				"Добавить",
+				WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
+				0, windowRect.bottom-110,
+				60, 110,
+				hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
+			);
+			LOGFONT lf{};
+			lf.lfHeight = 10;
+			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+			HFONT hFont = CreateFontIndirect(&lf);
+			SendMessage(button, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 
 
 
-		ListView_SetOutlineColor(hWndListView2, RGB(255, 0, 0));
+
+
+			// Создаем вторую ListView
+			HWND hWndListView2 = CreateWindowEx
+			(
+				WS_EX_CLIENTEDGE,
+				WC_LISTVIEW,
+				NULL,
+				WS_CHILD | WS_VISIBLE | LVS_REPORT,
+				windowRect.right/2,0, windowRect.right / 2, windowRect.bottom,
+				hWnd,
+				(HMENU)2,
+				hInst,
+				NULL
+			);
+
+			// Инициализация шрифтов и других параметров для ListView
+			LOGFONT lf2{};
+			lf2.lfHeight = 10;
+			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf2, 0);
+			HFONT hFont2 = CreateFontIndirect(&lf2);
+			SendMessage(hWndListView2, WM_SETFONT, (WPARAM)hFont2, TRUE);
+
+			// Добавляем столбцы в первую ListView
+			LVCOLUMN lvc{};
+			lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
+			lvc.cx = 100;
+
+			// Добавляем столбцы во вторую ListView
+			lvc.pszText = (wchar_t*)L"Column A";
+			ListView_InsertColumn(hWndListView2, 0, &lvc);
+			lvc.pszText = (wchar_t*)L"Column B";
+			ListView_InsertColumn(hWndListView2, 1, &lvc);
+
+			// Пример добавления элементов в первую ListView
+			LVITEM lvi{};
+			lvi.mask = LVIF_TEXT;
+
+			// Пример добавления элементов во вторую ListView
+			lvi.iItem = 0;
+			lvi.iSubItem = 0;
+			lvi.pszText = (wchar_t*)L"Item A";
+			ListView_InsertItem(hWndListView2, &lvi);
+			lvi.iSubItem = 1;
+			lvi.pszText = (wchar_t*)L"SubItem A.1";
+			ListView_SetItem(hWndListView2, &lvi);
 
 
 
-		WNDCLASSEXW wcTable{};
-		wcTable.cbSize = sizeof(WNDCLASSEX);
-		wcTable.lpfnWndProc = &(table.WindowProc);
-		wcTable.cbClsExtra = 0;
-		wcTable.cbWndExtra = 0;
-		wcTable.hInstance = hInst;
-		wcTable.hIcon = NULL;
-		wcTable.hCursor = LoadCursor(nullptr, IDC_ARROW);
-		wcTable.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-		wcTable.lpszClassName = L"Table";
-		wcTable.lpszMenuName = NULL;
-		wcTable.hIconSm = NULL;
 
-		ATOM res=RegisterClassExW(&wcTable);
-		table.CreateSelf
-		({
-			0,
-			L"Table",
-			L"t1",
-			WS_VISIBLE | WS_CHILD,
-			60, windowRect.bottom - 110,
-			windowRect.right / 2 - 60, 110,
-			hWnd,
-			NULL,
-			hInst,
-			&table 
-		});
+			ListView_SetOutlineColor(hWndListView2, RGB(255, 0, 0));
+
+
+
+			WNDCLASSEXW wcTable{};
+			wcTable.cbSize = sizeof(WNDCLASSEX);
+			wcTable.lpfnWndProc = &(table.WindowProc);
+			wcTable.cbClsExtra = 0;
+			wcTable.cbWndExtra = 0;
+			wcTable.hInstance = hInst;
+			wcTable.hIcon = NULL;
+			wcTable.hCursor = LoadCursor(nullptr, IDC_ARROW);
+			wcTable.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+			wcTable.lpszClassName = L"Table";
+			wcTable.lpszMenuName = NULL;
+			wcTable.hIconSm = NULL;
+
+			ATOM res=RegisterClassExW(&wcTable);
+			table.CreateSelf
+			({
+				0,
+				L"Table",
+				L"t1",
+				WS_VISIBLE | WS_CHILD,
+				60, windowRect.bottom - 110,
+				windowRect.right / 2 - 60, 110,
+				hWnd,
+				NULL,
+				hInst,
+				&table 
+			});
+
+			{
+				std::vector<std::string> headers =
+				{
+					"№",
+					"Имя",
+					"Описание",
+					"Время"
+				};
+				table.SetHeaders(headers);
+			}
 
 		
 
-		form.AddItem("tables","addTable", &table.GetWindowHandler());
-		form.AddItem("buttons","add",&button);
-		form.AddItem("listViews", "showListView", &hWndListView2);
-		form.SetNewSize(windowRect.right, windowRect.bottom);
-		form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
-		try
-		{
-			form.Resize();
-		}
-		catch (std::exception&)
-		{
-			MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
-			DestroyWindow(hWnd);
-		}
+			form.AddItem("tables","addTable", &table.GetWindowHandler());
+			form.AddItem("buttons","add",&button);
+			form.AddItem("listViews", "showListView", &hWndListView2);
+			form.SetNewSize(windowRect.right, windowRect.bottom);
+			form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
+			try
+			{
+				form.Resize();
+			}
+			catch (std::exception&)
+			{
+				MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
+				DestroyWindow(hWnd);
+			}
 		
 
 
-		break;
-	}
-	case WM_COMMAND:
-	{
-		int wmId = LOWORD(wParam);
-		// Разобрать выбор в меню:
-		switch (wmId)
-		{
-		case IDS_ADD_BUTTON:
-		{
-
 			break;
 		}
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+		case WM_COMMAND:
+		{
+			int wmId = LOWORD(wParam);
+			// Разобрать выбор в меню:
+			switch (wmId)
+			{
+			case IDS_ADD_BUTTON:
+			{
+
+				break;
+			}
+			case IDM_ABOUT:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				break;
+			case IDM_EXIT:
+				DestroyWindow(hWnd);
+				break;
+			default:
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
 			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
+		}
+		case WM_SIZE:
+		{
+			try
+			{
+				GetClientRect(hWnd, &windowRect);
+				form.SetNewSize(windowRect.right, windowRect.bottom);
+				form.Resize();
+			}
+			catch (std::exception&)
+			{
+				MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
+				DestroyWindow(hWnd);
+			}
+			break;
+		}
+		case WM_GETMINMAXINFO: //Получили сообщение от Винды
+		{
+			MINMAXINFO* pInfo = (MINMAXINFO*)lParam;
+			POINT Min = { 600, 400 };
+			pInfo->ptMinTrackSize = Min;
+			return 0;
+			break;
+		}
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			RECT windowRect; 
+			GetClientRect(hWnd, &windowRect);
+			HDC hdc = BeginPaint(hWnd, &ps);
+			
+
+			clockObj.SetWindowHandle(&hWnd);
+			clockObj.StartUpdateThread();
+			HDC memDC = CreateCompatibleDC(hdc);
+			HBITMAP memBM = 
+				CreateCompatibleBitmap(hdc, 
+					clockObj.GetRect().right - clockObj.GetRect().left+6, 
+					clockObj.GetRect().bottom - clockObj.GetRect().top+6);
+			SelectObject(memDC, memBM);
+
+			// Рисуем на внутреннем буфере
+			clockObj.Draw(&memDC);
+
+			// Копируем внутренний буфер на экран
+			BitBlt(hdc, 15, 15, 
+				clockObj.GetRect().right - clockObj.GetRect().left+6, 
+				clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
+
+			// Освобождаем ресурсы
+			DeleteObject(memBM);
+			DeleteDC(memDC);
+
+			
+			EndPaint(hWnd, &ps);
+			break;
+		}
+		case WM_DESTROY:
+			PostQuitMessage(0);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-		break;
-	}
-	case WM_SIZE:
-	{
-		try
-		{
-			GetClientRect(hWnd, &windowRect);
-			form.SetNewSize(windowRect.right, windowRect.bottom);
-			form.Resize();
-		}
-		catch (std::exception&)
-		{
-			MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
-			DestroyWindow(hWnd);
-		}
-		break;
-	}
-	case WM_GETMINMAXINFO: //Получили сообщение от Винды
-	{
-		MINMAXINFO* pInfo = (MINMAXINFO*)lParam;
-		POINT Min = { 600, 400 };
-		pInfo->ptMinTrackSize = Min;
-		return 0;
-		break;
-	}
-	case WM_PAINT:
-	{
-		PAINTSTRUCT ps;
-		RECT windowRect; 
-		GetClientRect(hWnd, &windowRect);
-		HDC hdc = BeginPaint(hWnd, &ps);
-			
-
-		clockObj.SetWindowHandle(&hWnd);
-		clockObj.StartUpdateThread();
-		HDC memDC = CreateCompatibleDC(hdc);
-		HBITMAP memBM = 
-			CreateCompatibleBitmap(hdc, 
-				clockObj.GetRect().right - clockObj.GetRect().left+6, 
-				clockObj.GetRect().bottom - clockObj.GetRect().top+6);
-		SelectObject(memDC, memBM);
-
-		// Рисуем на внутреннем буфере
-		clockObj.Draw(&memDC);
-
-		// Копируем внутренний буфер на экран
-		BitBlt(hdc, 15, 15, 
-			clockObj.GetRect().right - clockObj.GetRect().left+6, 
-			clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
-
-		// Освобождаем ресурсы
-		DeleteObject(memBM);
-		DeleteDC(memDC);
-
-			
-		EndPaint(hWnd, &ps);
-		break;
-	}
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
