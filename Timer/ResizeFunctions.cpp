@@ -153,7 +153,7 @@ namespace DeclarativeClasses
 								it->second,
 								rect.left, rect.top,
 								rect.right - rect.left, rect.bottom - rect.top,
-								TRUE
+								FALSE
 							);
 						}
 					}

@@ -129,7 +129,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 				0L,
 				L"static",
 				NULL,
-				WS_CHILD | WS_VISIBLE | SS_CENTER | WS_BORDER,
+				WS_CHILD | WS_VISIBLE | SS_CENTER | WS_BORDER | SS_NOTIFY,
 				40 * i, 0,
 				40, 15,
 				_thisWindow,
@@ -243,139 +243,27 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 	{
-		BOOL r = ShowScrollBar(hWnd, SB_BOTH, TRUE);
-		r = SetScrollRange(hWnd, SB_HORZ, this->minHScrollbarPos, this->maxHScrollbarPos, TRUE);
-		r = SetScrollRange(hWnd, SB_VERT, this->minVScrollbarPos, this->maxVScrollbarPos, TRUE);
-
-		r = SetScrollPos(hWnd, SB_HORZ, this->hScrollbarPos, TRUE);
-		r = SetScrollPos(hWnd, SB_VERT, this->vScrollbarPos, TRUE);
 		break;
 	}
-	case WM_HSCROLL:
+	case WM_COMMAND:
 	{
-		switch (LOWORD(wParam))
+		int loword = LOWORD(wParam);
+		if (loword >= 0 and loword <= 3)
 		{
-		case SB_PAGERIGHT:
-		{
-			hScrollbarPos += 1;
-			break;
-		}
-		case SB_LINERIGHT:
-		{
-			hScrollbarPos += 1;
-			break;
-		}
+			auto handleIt = GetHandlers().at("textBoxHeader").begin();
+			for (UINT i = 0; i != LOWORD(wParam); ++i, ++handleIt);
 
-
-		case SB_PAGELEFT:
-		{
-			hScrollbarPos -= 1;
-			break;
-		}
-		case SB_LINELEFT:
-		{
-			hScrollbarPos -= 1;
-			break;
+			char str[0x100]="";
+			
+			GetWindowTextA(handleIt->second, str, 0xFE);
+			MessageBoxA(hWnd, str, "Click", MB_OK);
 		}
 
-
-		case SB_BOTTOM:
-		{
-			hScrollbarPos = maxVScrollbarPos;
-			break;
-		}
-		case SB_TOP:
-		{
-			hScrollbarPos = minVScrollbarPos;
-			break;
-		}
-
-
-		case SB_THUMBPOSITION:
-		case SB_THUMBTRACK:
-		{
-			hScrollbarPos = HIWORD(wParam);
-			break;
-		}
-		}
-
-		if (hScrollbarPos > maxHScrollbarPos)
-			hScrollbarPos = maxHScrollbarPos;
-		if (hScrollbarPos < minHScrollbarPos)
-			hScrollbarPos = minHScrollbarPos;
-
-		SetScrollPos(hWnd, SB_HORZ, hScrollbarPos, TRUE);
-
-		RECT r{};
-		GetClientRect(hWnd, &r);
-		InvalidateRect(hWnd, &r, TRUE);
-		break;
-	}
-	case WM_VSCROLL:
-	{
-		switch (LOWORD(wParam))
-		{
-		case SB_PAGEUP:
-		{
-			vScrollbarPos -= 1;
-			break;
-		}
-		case SB_LINEUP:
-		{
-			vScrollbarPos -= 1;
-			break;
-		}
-
-
-		case SB_PAGEDOWN:
-		{
-			vScrollbarPos += 1;
-			break;
-		}
-		case SB_LINEDOWN:
-		{
-			vScrollbarPos += 1;
-			break;
-		}
-
-
-		case SB_TOP:
-		{
-			vScrollbarPos = maxVScrollbarPos;
-			break;
-		}
-		case SB_BOTTOM:
-		{
-			vScrollbarPos = minVScrollbarPos;
-			break;
-		}
-
-
-		case SB_THUMBPOSITION:
-		case SB_THUMBTRACK:
-		{
-			vScrollbarPos = HIWORD(wParam);
-			break;
-		}
-		}
-
-		if (vScrollbarPos > maxVScrollbarPos)
-			vScrollbarPos = maxVScrollbarPos;
-		if (vScrollbarPos < minVScrollbarPos)
-			vScrollbarPos = minVScrollbarPos;
-
-		SetScrollPos(hWnd, SB_VERT, vScrollbarPos, TRUE);
-
-		RECT r{};
-		GetClientRect(hWnd, &r);
-		InvalidateRect(hWnd, &r, TRUE);
 		break;
 	}
 	case WM_SIZE:
 	{
-		RECT clientRect{};
-		GetClientRect(hWnd, &clientRect);
-		SetNewSize(clientRect.right, clientRect.bottom);
+		SetNewSize(LOWORD(lParam), HIWORD(lParam));
 		try
 		{
 			_resizeFunction(LOWORD(lParam), HIWORD(lParam), (void*)&Form::GetHandlers());
@@ -384,41 +272,10 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 
 		}
-
-		int newWidth = LOWORD(lParam); // Новая ширина окна
-		int newHeight = HIWORD(lParam); // Новая высота окна
-
-
-		RECT windowRect{};
-		GetWindowRect(hWnd, &windowRect);
-		MapWindowPoints(hWnd, GetParent(hWnd), (LPPOINT)(&clientRect), 2);
-
-		maxVScrollbarPos = (windowRect.bottom + windowRect.top) / clientRect.bottom;
-		maxHScrollbarPos = (windowRect.right + windowRect.left) / clientRect.right;
-
-		UINT horzPage = (windowRect.bottom + windowRect.top) / clientRect.bottom / maxVScrollbarPos;
-		UINT vertPage = (windowRect.right + windowRect.left) / clientRect.right / maxHScrollbarPos;
-
-		++maxVScrollbarPos;
-		++maxHScrollbarPos;
-
-		SCROLLINFO si{};
-		si.cbSize = sizeof(si);
-		si.fMask = SIF_PAGE;
-		si.nPage = newWidth;
-		SetScrollInfo(hWnd, SB_VERT, &si, TRUE); // Обновите вертикальный ползунок
-
-		si.nPage = newHeight;
-		SetScrollInfo(hWnd, SB_HORZ, &si, TRUE); // Обновите горизонтальный ползунок
+		RECT clientRect{};
+		GetClientRect(hWnd, &clientRect);
 
 
-		BOOL succes =
-			SetScrollRange(hWnd, SB_HORZ, this->minHScrollbarPos, this->maxHScrollbarPos, TRUE);
-		succes = SetScrollRange(hWnd, SB_VERT, this->minVScrollbarPos, this->maxVScrollbarPos, TRUE);
-
-
-		succes = SetScrollPos(hWnd, SB_HORZ, this->hScrollbarPos, TRUE);
-		succes = SetScrollPos(hWnd, SB_VERT, this->vScrollbarPos, TRUE);
 
 		InvalidateRect(hWnd, &clientRect, TRUE);
 		break;

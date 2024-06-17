@@ -42,7 +42,7 @@ void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::ControlForm form;
-DeclarativeClasses::Table table(4u,12u);
+DeclarativeClasses::Table table(4u,50u);
 
 RECT windowRect;
 
