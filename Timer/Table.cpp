@@ -164,7 +164,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 					0L,
 					L"edit",
 					(!j) ? std::to_wstring(i + 1).c_str() : L"",
-					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ((!j) ? ES_READONLY : 0ul),
 					40 * j, 15+15 * i,
 					40, 15,
 					_thisWindow,
@@ -190,6 +190,8 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 	Form::SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::ResizeAddTable);
 	Form::SetNewSize(args.nWidth, args.nHeight);
 	_resizeFunction(args.nWidth, args.nHeight, (void*)&Form::GetHandlers());
+
+	isInitilized = true;
 }
 
 const HWND& Table::GetWindowHandler()
@@ -253,12 +255,58 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			auto handleIt = GetHandlers().at("textBoxHeader").begin();
 			for (UINT i = 0; i != LOWORD(wParam); ++i, ++handleIt);
 
-			char str[0x100]="";
-			
+			char str[0x100] = "";
+
 			GetWindowTextA(handleIt->second, str, 0xFE);
 			MessageBoxA(hWnd, str, "Click", MB_OK);
 		}
+		else
+			if (((UINT)loword) < _columns * _rows)
+			{
+				if (selectedEdit != -1 and selectedEdit!=loword)
+				{
+					if (isInitilized)
+					{
+						HANDLER_CONTAINER hCont = Form::GetHandlers();
 
+						try
+						{
+							int editId = 4;
+
+							auto editIt = hCont.at("textBox").begin();
+							for (; editId != selectedEdit; ++editId, ++editIt);
+
+							SendMessage(editIt->second, EM_SETSEL, 0, 0);
+							selectedEdit = -1;
+						}
+						catch (const std::exception&)
+						{
+						}
+					}
+				}
+
+				selectedEdit = loword;
+			}
+				
+
+		break;
+	}
+	case WM_KEYDOWN:
+	{
+		if (wParam==VK_RETURN)
+		{
+			if (selectedEdit != -1)
+			{
+				selectedEdit = -1;
+
+				int editId = 4;
+				auto editIt = Form::GetHandlers().at("textBox").begin();
+				for (; editId != selectedEdit; ++editId, ++editIt);
+
+				SendMessage(editIt->second, EM_SETSEL, 0, 0);
+				selectedEdit = -1;
+			}
+		}
 		break;
 	}
 	case WM_SIZE:

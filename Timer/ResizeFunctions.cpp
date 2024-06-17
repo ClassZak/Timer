@@ -61,6 +61,9 @@ namespace DeclarativeClasses
 							w / 2 - addTableRect.left, h - addTableRect.top,
 							FALSE
 						);
+
+						InvalidateRect(addTable,NULL, TRUE);
+						InvalidateRect(GetParent(addTable),NULL, TRUE);
 					}
 					{
 						HWND showListView = std::find_if
@@ -82,6 +85,8 @@ namespace DeclarativeClasses
 							w / 2, showListViewRECT.top-2,
 							w / 2, h - showListViewRECT.top+2, FALSE
 						);
+
+						InvalidateRect(showListView, NULL, TRUE);
 					}
 					
 

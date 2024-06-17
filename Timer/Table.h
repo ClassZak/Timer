@@ -97,19 +97,12 @@ public:
 
 protected:
 	HWND _thisWindow{};
-	HWND _tableView{};
-	HWND _horScrollBar{};
-	HWND _vertScrollBar{};
-
-	int vScrollbarPos = 1;
-	int hScrollbarPos = 1;
-	int maxVScrollbarPos = 1;
-	int maxHScrollbarPos = 1;
-	int minVScrollbarPos = 1;
-	int minHScrollbarPos = 1;
 
 	UINT _columns =1;
 	UINT _rows=1;
+
+	int selectedEdit=-1;
+	bool isInitilized = false;
 };
 }
 

@@ -319,8 +319,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
+		if (wParam == SC_RESTORE)
+		{
+			RECT rect;
+			GetClientRect(hWnd, &rect);
+			form.SetNewSize(rect.right, rect.bottom);
+			form.Resize();
+			UpdateWindow(hWnd);
+
+			return DefWindowProcW(hWnd, message, wParam, lParam);
+		}
 		case WM_SIZE:
 		{
+			RECT rect;
+			GetClientRect(hWnd, &rect);
+
 			try
 			{
 				GetClientRect(hWnd, &windowRect);
