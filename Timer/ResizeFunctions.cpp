@@ -88,6 +88,82 @@ namespace DeclarativeClasses
 					return EXIT_SUCCESS;
 				}
 			);
+			extern std::function<BOOL(int w, int h, void* handlers)> ResizeAddTable
+			(
+				[](int w, int h, void* handlers)->BOOL
+				{
+					HANDLER_CONTAINER* hContainer = static_cast<HANDLER_CONTAINER*>(handlers);
+
+
+					int numberWidth = 40;
+					int otherWidth = w - numberWidth;
+					
+					{
+						auto it = hContainer->at("textBoxHeader").begin();
+						++it;
+
+						RECT rect{};
+						for (int i=0; it != hContainer->at("textBoxHeader").end(); ++it,++i)
+						{
+							GetClientRect(it->second, &rect);
+							MapWindowPoints(it->second, GetParent(it->second), (LPPOINT)&rect, 2);
+
+							rect.left = 40 + otherWidth / 3 * i;
+							rect.right = rect.left + otherWidth / 3;
+
+							if (i == 2)
+								rect.right += otherWidth % 3;
+
+							MoveWindow
+							(
+								it->second,
+								rect.left, rect.top-1,
+								rect.right - rect.left, rect.bottom - rect.top+2,
+								TRUE
+							);
+						}
+					}
+					{
+						auto it = hContainer->at("textBox").begin();
+
+						RECT rect{};
+						for (int i=0; it != hContainer->at("textBox").end(); ++it,++i)
+						{
+							GetClientRect(it->second, &rect);
+							MapWindowPoints(it->second, GetParent(it->second), (LPPOINT)&rect, 2);
+
+							if ((i % 4))
+							{
+								rect.left = 40 + otherWidth / 3 * ((i-1)%4);
+								rect.right = rect.left + otherWidth / 3;
+							}
+							else
+							{
+								rect.left = 0;
+								rect.right = 40;
+							}
+
+
+							
+
+							if (i %4== 3)
+								rect.right += otherWidth % 3;
+							MoveWindow
+							(
+								it->second,
+								rect.left, rect.top,
+								rect.right - rect.left, rect.bottom - rect.top,
+								TRUE
+							);
+						}
+					}
+
+
+
+
+					return EXIT_SUCCESS;
+				}
+			);
 		}
 	}
 }

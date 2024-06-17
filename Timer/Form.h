@@ -55,6 +55,7 @@ public:
 private:
 	HANDLER_CONTAINER _handlers{};
 	
+protected:
 	/// <summary>
 	/// Функция для управления размерами объектов
 	/// </summary>
@@ -63,7 +64,6 @@ private:
 	{
 		return EXIT_FAILURE;
 	};
-protected:
 	HANDLER_CONTAINER& GetHandlers();
 
 	int _width = 0, _height = 0;

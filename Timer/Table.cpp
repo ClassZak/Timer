@@ -127,9 +127,9 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 			CreateWindowExW
 			(
 				0L,
-				L"edit",
+				L"static",
 				NULL,
-				WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_READONLY,
+				WS_CHILD | WS_VISIBLE | SS_CENTER | WS_BORDER,
 				40 * i, 0,
 				40, 15,
 				_thisWindow,
@@ -163,7 +163,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 				(
 					0L,
 					L"edit",
-					(std::to_wstring(i) + L" " + std::to_wstring(j)).c_str(),
+					(!j) ? std::to_wstring(i + 1).c_str() : L"",
 					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
 					40 * j, 15+15 * i,
 					40, 15,
@@ -186,6 +186,10 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 				&edit
 			);
 		}
+
+	Form::SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::ResizeAddTable);
+	Form::SetNewSize(args.nWidth, args.nHeight);
+	_resizeFunction(args.nWidth, args.nHeight, (void*)&Form::GetHandlers());
 }
 
 const HWND& Table::GetWindowHandler()
@@ -372,6 +376,14 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		RECT clientRect{};
 		GetClientRect(hWnd, &clientRect);
 		SetNewSize(clientRect.right, clientRect.bottom);
+		try
+		{
+			_resizeFunction(LOWORD(lParam), HIWORD(lParam), (void*)&Form::GetHandlers());
+		}
+		catch (const std::exception&)
+		{
+
+		}
 
 		int newWidth = LOWORD(lParam); // Новая ширина окна
 		int newHeight = HIWORD(lParam); // Новая высота окна

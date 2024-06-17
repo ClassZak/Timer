@@ -11,6 +11,7 @@ namespace DeclarativeClasses
 		namespace ResizeFunctions
 		{
 			extern std::function<BOOL(int w, int h, void* handlers)> L1;
+			extern std::function<BOOL(int w, int h, void* handlers)> ResizeAddTable;
 		}
 	}
 }
