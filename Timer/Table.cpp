@@ -320,12 +320,6 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 
 		}
-		RECT clientRect{};
-		GetClientRect(hWnd, &clientRect);
-
-
-
-		InvalidateRect(hWnd, &clientRect, TRUE);
 		break;
 	}
 	case WM_PAINT:

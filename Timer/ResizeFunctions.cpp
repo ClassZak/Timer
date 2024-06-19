@@ -143,12 +143,10 @@ namespace DeclarativeClasses
 								rect.right = rect.left + otherWidth / 3;
 							}
 							else
-							{
-								rect.left = 0;
-								rect.right = 40;
-							}
+								continue;
 
-
+							if (rect.top > h)
+								break;
 							
 
 							if (i %4== 3)
