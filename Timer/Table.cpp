@@ -1,4 +1,5 @@
 #include "Table.h"
+#include "Functions.h"
 namespace DeclarativeClasses
 {
 #pragma region Constructors and destructors
@@ -33,6 +34,7 @@ Table::Table(Table& other) : ControlForm(((ControlForm&)(other)))
 {
 }
 
+#pragma endregion
 #pragma region Public
 Table::Table(UINT cols, UINT rows) : Table()
 {
@@ -178,7 +180,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 			HFONT hFont = CreateFontIndirect(&lf);
 			SendMessage(edit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
-			SetWindowSubclass(edit, &EditProc, id, NULL);
+			SetWindowSubclass(edit, &EditProc, id, (DWORD_PTR)this);
 			Form::AddItem
 			(
 				"textBox",
@@ -236,6 +238,74 @@ void Table::SetColumnsAndRows(UINT cols, UINT rows)
 {
 	_columns = cols;
 	_rows = rows;
+}
+
+
+inline bool Table::CellIsLeft(UINT& id) const
+{
+	UINT row = id / _columns;
+	UINT column = id - _columns * row;
+	return column==1;
+}
+
+inline bool Table::CellIsRight(UINT& id) const
+{
+	UINT row = id / _columns;
+	UINT column = id - _columns * row;
+	return column==_columns-1;
+}
+
+inline bool Table::CellIsTop(UINT& id) const
+{
+	return (id / _columns)==1;
+}
+
+inline bool Table::CellIsBottom(UINT& id)
+{
+	try
+	{
+		RECT rect{};
+
+
+		auto elIt = std::find_if
+		(
+			Form::GetHandlers().at("textBox").begin(),
+			Form::GetHandlers().at("textBox").end(),
+			[&id](const std::pair<std::string, HWND>& pair) -> bool
+			{
+				return std::to_unsigned_number(pair.first) == id;
+			}
+		);
+		if (elIt == Form::GetHandlers().at("textBox").end())
+			throw;
+
+		GetClientRect(elIt->second, &rect);
+		MapWindowPoints(elIt->second, GetParent(elIt->second), (LPPOINT)&rect, 2);
+
+		return (rect.bottom + 15) >= _height or rect.bottom >= _height;
+	}
+	catch (const std::exception&)
+	{
+		return false;
+	}
+}
+
+
+void Table::ResetFocus(UINT id, Direction direction)
+{
+	switch (direction)
+	{
+		case DeclarativeClasses::Right:
+			break;
+		case DeclarativeClasses::Left:
+			break;
+		case DeclarativeClasses::Up:
+			break;
+		case DeclarativeClasses::Down:
+			break;
+		default:
+			break;
+	}
 }
 
 

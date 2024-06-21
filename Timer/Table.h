@@ -1,6 +1,7 @@
 #pragma once
 #include "ControlForm.h"
 #include "CreateWindowArgs.h"
+#include "DirectionOfCells.h"
 #include <CommCtrl.h>
 namespace DeclarativeClasses
 {
@@ -102,12 +103,20 @@ protected:
 	UINT _columns =1;
 	UINT _rows=1;
 
-	int selectedEdit=-1;
 	bool isInitilized = false;
 
+
+	inline bool CellIsLeft(UINT& id) const;
+	inline bool CellIsRight(UINT& id) const;
+	inline bool CellIsTop(UINT& id) const;
+	inline bool CellIsBottom(UINT& id);
+
+	void ResetFocus(UINT id, Direction direction);
 	static LRESULT CALLBACK EditProc
 	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
+		Table* tablePtr =reinterpret_cast<Table*>(dwRefData);
+
 		if (msg == WM_KEYDOWN)
 		{
 			if(

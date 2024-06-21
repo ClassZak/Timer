@@ -134,8 +134,10 @@
     <ClInclude Include="Clock.h" />
     <ClInclude Include="ControlForm.h" />
     <ClInclude Include="CreateWindowArgs.h" />
+    <ClInclude Include="DirectionOfCells.h" />
     <ClInclude Include="Form.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Functions.h" />
     <ClInclude Include="ResizeFunctions.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Table.h" />

@@ -96,6 +96,12 @@
     <ClInclude Include="CreateWindowArgs.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="DirectionOfCells.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer.cpp">
