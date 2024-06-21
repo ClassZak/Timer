@@ -40,7 +40,7 @@ Table::Table(UINT cols, UINT rows) : Table()
 }
 
 
-Table::Table(UINT cols, UINT rows, int w, int h) : ControlForm(w, h)
+Table::Table(UINT cols, UINT rows, int w, int h) : Table(w, h)
 {
 	SetColumnsAndRows(cols, rows);
 }
@@ -164,7 +164,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 					0L,
 					L"edit",
 					(!j) ? std::to_wstring(i + 1).c_str() : L"",
-					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ((!j) ? ES_READONLY : 0ul),
+					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ((!j) ? ES_READONLY : 0ul) | ES_WANTRETURN,
 					40 * j, 15+15 * i,
 					40, 15,
 					_thisWindow,
@@ -178,7 +178,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 			HFONT hFont = CreateFontIndirect(&lf);
 			SendMessage(edit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
-
+			SetWindowSubclass(edit, &EditProc, id, NULL);
 			Form::AddItem
 			(
 				"textBox",
@@ -259,35 +259,7 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			GetWindowTextA(handleIt->second, str, 0xFE);
 			MessageBoxA(hWnd, str, "Click", MB_OK);
-		}
-		else
-			if (((UINT)loword) < _columns * _rows)
-			{
-				if (selectedEdit != -1 and selectedEdit!=loword)
-				{
-					if (isInitilized)
-					{
-						HANDLER_CONTAINER hCont = Form::GetHandlers();
-
-						try
-						{
-							int editId = 4;
-
-							auto editIt = hCont.at("textBox").begin();
-							for (; editId != selectedEdit; ++editId, ++editIt);
-
-							SendMessage(editIt->second, EM_SETSEL, 0, 0);
-							selectedEdit = -1;
-						}
-						catch (const std::exception&)
-						{
-						}
-					}
-				}
-
-				selectedEdit = loword;
-			}
-				
+		}		
 
 		break;
 	}
@@ -295,17 +267,7 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		if (wParam==VK_RETURN)
 		{
-			if (selectedEdit != -1)
-			{
-				selectedEdit = -1;
-
-				int editId = 4;
-				auto editIt = Form::GetHandlers().at("textBox").begin();
-				for (; editId != selectedEdit; ++editId, ++editIt);
-
-				SendMessage(editIt->second, EM_SETSEL, 0, 0);
-				selectedEdit = -1;
-			}
+			SetFocus(hWnd);
 		}
 		break;
 	}
@@ -320,6 +282,9 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 
 		}
+
+
+		SetFocus(hWnd);
 		break;
 	}
 	case WM_PAINT:

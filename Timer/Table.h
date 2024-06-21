@@ -1,6 +1,7 @@
 #pragma once
 #include "ControlForm.h"
 #include "CreateWindowArgs.h"
+#include <CommCtrl.h>
 namespace DeclarativeClasses
 {
 class Table : public ControlForm
@@ -103,6 +104,38 @@ protected:
 
 	int selectedEdit=-1;
 	bool isInitilized = false;
+
+	static LRESULT CALLBACK EditProc
+	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+	{
+		if (msg == WM_KEYDOWN)
+		{
+			if(
+				wParam == VK_RETURN or
+				wParam == VK_TAB
+			)
+			{
+				SetFocus(GetParent(hWnd));
+				return 0;
+			}
+
+			if (GetKeyState(VK_CONTROL) & 0x8000)
+			{
+				if (
+					wParam == VK_LEFT or
+					wParam == VK_RIGHT or
+					wParam == VK_DOWN or
+					wParam == VK_UP
+				)
+				{
+					SetFocus(GetParent(hWnd));
+					return 0;
+				}
+			}
+		}
+
+		return DefSubclassProc(hWnd, msg, wParam, lParam);
+	}
 };
 }
 
