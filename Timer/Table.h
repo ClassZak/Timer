@@ -102,6 +102,7 @@ protected:
 
 	UINT _columns =1;
 	UINT _rows=1;
+	INT _selectedEdit = -1;
 
 	bool isInitilized = false;
 
@@ -111,7 +112,11 @@ protected:
 	inline bool CellIsTop(UINT& id) const;
 	inline bool CellIsBottom(UINT& id);
 
+	std::pair<UINT, UINT> IdToPair(UINT id) const;
+	void SortByEnteredCell(UINT id,HWND cell);
+
 	void ResetFocus(UINT id, Direction direction);
+	void KillCellsFocus();
 	static LRESULT CALLBACK EditProc
 	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
@@ -124,7 +129,8 @@ protected:
 				wParam == VK_TAB
 			)
 			{
-				SetFocus(GetParent(hWnd));
+				tablePtr->KillCellsFocus();
+				tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
 				return 0;
 			}
 
@@ -137,7 +143,8 @@ protected:
 					wParam == VK_UP
 				)
 				{
-					SetFocus(GetParent(hWnd));
+					tablePtr->KillCellsFocus();
+					tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
 					return 0;
 				}
 			}

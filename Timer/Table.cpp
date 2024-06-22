@@ -290,6 +290,38 @@ inline bool Table::CellIsBottom(UINT& id)
 	}
 }
 
+std::pair<UINT, UINT> Table::IdToPair(UINT id) const
+{
+	UINT row = id / _columns;
+	UINT col = id - row * _columns;
+
+	return std::pair<UINT, UINT>(row,col);
+}
+
+void Table::SortByEnteredCell(UINT id, HWND cell)
+{
+	UINT row, col;
+	{
+		std::pair<UINT, UINT> coords = IdToPair(id);
+		row = coords.first;
+		col = coords.second;
+	}
+
+	if (!(row-1) or !col)
+		return;
+
+	UINT needId =_columns+col+1;
+
+
+	char buff[0x100] = "";
+	GetWindowTextA(cell, buff, 0xFE);
+
+	if (buff[0]=='\0' or buff == "")
+		return;
+
+	MessageBoxA(_thisWindow, buff, "Entered text:", MB_OK);
+}
+
 
 void Table::ResetFocus(UINT id, Direction direction)
 {
@@ -306,6 +338,12 @@ void Table::ResetFocus(UINT id, Direction direction)
 		default:
 			break;
 	}
+}
+
+void Table::KillCellsFocus()
+{
+	SetFocus(_thisWindow);
+	_selectedEdit = -1;
 }
 
 
@@ -329,16 +367,17 @@ LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			GetWindowTextA(handleIt->second, str, 0xFE);
 			MessageBoxA(hWnd, str, "Click", MB_OK);
-		}		
+		}
+		else
+			_selectedEdit = loword;
+		
 
 		break;
 	}
 	case WM_KEYDOWN:
 	{
 		if (wParam==VK_RETURN)
-		{
-			SetFocus(hWnd);
-		}
+			KillCellsFocus();
 		break;
 	}
 	case WM_SIZE:
