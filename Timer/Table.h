@@ -106,6 +106,7 @@ protected:
 
 	bool isInitilized = false;
 
+	NUMBERED_HANDLER_CONTAINER cells;
 
 	inline bool CellIsLeft(UINT& id) const;
 	inline bool CellIsRight(UINT& id) const;
@@ -113,6 +114,8 @@ protected:
 	inline bool CellIsBottom(UINT& id);
 
 	std::pair<UINT, UINT> IdToPair(UINT id) const;
+	void IdToPair(UINT id,UINT* row,UINT* col) const;
+	UINT PairToId(UINT row, UINT col);
 	void SortByEnteredCell(UINT id,HWND cell);
 
 	void ResetFocus(UINT id, Direction direction);
@@ -129,22 +132,30 @@ protected:
 				wParam == VK_TAB
 			)
 			{
-				tablePtr->KillCellsFocus();
 				tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
+				tablePtr->KillCellsFocus();
+
+				if((wParam == VK_RETURN and ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))) or
+					wParam == VK_TAB)
+				tablePtr->ResetFocus
+				(uIdSubclass, wParam == VK_RETURN ? DeclarativeClasses::Down : DeclarativeClasses::Right);
+
 				return 0;
 			}
 
-			if (GetKeyState(VK_CONTROL) & 0x8000)
+			if ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))
 			{
 				if (
 					wParam == VK_LEFT or
+					wParam == VK_UP or
 					wParam == VK_RIGHT or
-					wParam == VK_DOWN or
-					wParam == VK_UP
+					wParam == VK_DOWN
 				)
 				{
-					tablePtr->KillCellsFocus();
 					tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
+					tablePtr->KillCellsFocus();
+					tablePtr->ResetFocus(uIdSubclass, (DeclarativeClasses::Direction)(wParam - 0x24));
+					
 					return 0;
 				}
 			}

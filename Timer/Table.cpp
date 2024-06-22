@@ -166,7 +166,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 					0L,
 					L"edit",
 					(!j) ? std::to_wstring(i + 1).c_str() : L"",
-					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ((!j) ? ES_READONLY : 0ul) | ES_WANTRETURN,
+					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ((!j) ? ES_READONLY : 0ul),
 					40 * j, 15+15 * i,
 					40, 15,
 					_thisWindow,
@@ -187,6 +187,7 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 				std::to_string(id),
 				&edit
 			);
+			cells.insert(std::pair<UINT, HWND>(id, edit));
 		}
 
 	Form::SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::ResizeAddTable);
@@ -257,7 +258,7 @@ inline bool Table::CellIsRight(UINT& id) const
 
 inline bool Table::CellIsTop(UINT& id) const
 {
-	return (id / _columns)==1;
+	return (id / _columns)==0;
 }
 
 inline bool Table::CellIsBottom(UINT& id)
@@ -273,7 +274,9 @@ inline bool Table::CellIsBottom(UINT& id)
 			Form::GetHandlers().at("textBox").end(),
 			[&id](const std::pair<std::string, HWND>& pair) -> bool
 			{
-				return std::to_unsigned_number(pair.first) == id;
+				unsigned int id_ = std::to_unsigned_number(pair.first);
+
+				return id_ == id;
 			}
 		);
 		if (elIt == Form::GetHandlers().at("textBox").end())
@@ -282,7 +285,7 @@ inline bool Table::CellIsBottom(UINT& id)
 		GetClientRect(elIt->second, &rect);
 		MapWindowPoints(elIt->second, GetParent(elIt->second), (LPPOINT)&rect, 2);
 
-		return (rect.bottom + 15) >= _height or rect.bottom >= _height;
+		return rect.bottom >= _height;
 	}
 	catch (const std::exception&)
 	{
@@ -296,6 +299,17 @@ std::pair<UINT, UINT> Table::IdToPair(UINT id) const
 	UINT col = id - row * _columns;
 
 	return std::pair<UINT, UINT>(row,col);
+}
+
+void Table::IdToPair(UINT id, UINT* row, UINT* col) const
+{
+	*row = id / _columns;
+	*col = id - (*row) * _columns;
+}
+
+UINT Table::PairToId(UINT row, UINT col)
+{
+	return row*_columns+col;
 }
 
 void Table::SortByEnteredCell(UINT id, HWND cell)
@@ -319,22 +333,153 @@ void Table::SortByEnteredCell(UINT id, HWND cell)
 	if (buff[0]=='\0' or buff == "")
 		return;
 
-	MessageBoxA(_thisWindow, buff, "Entered text:", MB_OK);
+	UINT needRow = 1;
+	bool rowIsEmpty = true;
+
+	for (UINT i = row-1; i != 0; --i)
+	{
+		for (UINT j = 1; j != _columns; ++j)
+		{
+			UINT needId=PairToId(i,j);
+			auto it =  std::find_if
+			(
+				cells.begin(),
+				cells.end(),
+				[needId](const std::pair<UINT, HWND>& pair)->bool
+				{
+					return pair.first == needId;
+				}
+			);
+
+			if (it == cells.end())
+				throw;
+
+			GetWindowTextA(it->second, buff, 0xFE);
+			if (buff[0] != '\0' and buff != "")
+			{
+				rowIsEmpty = false;
+				break;
+			}
+		}
+		if (!rowIsEmpty)
+		{
+			needRow = i + 1;
+			break;
+		}
+	}
+	if (needRow == row)
+		return;
+	
+
+	{
+		GetWindowTextA(cell, buff, 0xFE);
+
+		UINT needId=PairToId(needRow, col);
+		auto it = std::find_if
+		(
+			cells.begin(),
+			cells.end(),
+			[needId](const std::pair<UINT, HWND>& pair)->bool
+			{
+				return pair.first == needId;
+			}
+		);
+		if (it == cells.end())
+			throw;
+
+
+		SetWindowTextA(it->second, buff);
+		SetWindowTextA(cell, "");
+	}
 }
 
 
 void Table::ResetFocus(UINT id, Direction direction)
 {
+	UINT row, col,needId;
+	IdToPair(id, &row, &col);
+
+
 	switch (direction)
 	{
 		case DeclarativeClasses::Right:
+		{
+			needId = (col == _columns - 1) ? PairToId(row + 1, 1) : PairToId(row,col+1);
+			auto it = std::find_if
+			(
+				cells.begin(),
+				cells.end(),
+				[needId](const std::pair<UINT,HWND>& pair)->bool
+				{
+					return pair.first == needId;
+				}
+			);
+
+			if (it == cells.end() or CellIsBottom(id) or CellIsBottom(needId))
+				return;
+
+			SetFocus(it->second);
+
 			break;
+		}
 		case DeclarativeClasses::Left:
+		{
+			needId = (col == 1) ? PairToId(row - 1, _columns-1) : PairToId(row, col - 1);
+			auto it = std::find_if
+			(
+				cells.begin(),
+				cells.end(),
+				[needId](const std::pair<UINT, HWND>& pair)->bool
+				{
+					return pair.first == needId;
+				}
+			);
+
+			if (it == cells.end() or CellIsTop(needId))
+				return;
+
+			SetFocus(it->second);
+
 			break;
+		}
 		case DeclarativeClasses::Up:
+		{
+			needId = PairToId(row - 1, col);
+			auto it = std::find_if
+			(
+				cells.begin(),
+				cells.end(),
+				[needId](const std::pair<UINT, HWND>& pair)->bool
+				{
+					return pair.first == needId;
+				}
+			);
+			if (it == cells.end() or CellIsTop(needId))
+				return;
+
+			SetFocus(it->second);
+
 			break;
+		}
 		case DeclarativeClasses::Down:
+		{
+			needId = PairToId(row + 1, col);
+			auto it = std::find_if
+			(
+				cells.begin(),
+				cells.end(),
+				[needId](const std::pair<UINT, HWND>& pair)->bool
+				{
+					return pair.first == needId;
+				}
+			);
+			if (it == cells.end() or CellIsBottom(needId))
+				return;
+
+			SetFocus(it->second);
+
 			break;
+		}
 		default:
 			break;
 	}
