@@ -5,77 +5,77 @@
 #include <CommCtrl.h>
 namespace DeclarativeClasses
 {
-class Table : public ControlForm
+class ATable : public ControlForm
 {
 #pragma region Constructors and destructors
 #pragma region Base constructors
 
 public:
 #pragma region Public
-	Table(UINT cols, UINT rows);
-	Table(UINT cols, UINT rows,int w,int h);
-	Table(UINT cols, UINT rows, HANDLER_CONTAINER handlers);
-	Table(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers);
-	Table(UINT cols, UINT rows, std::function<BOOL(int, int, void*)>& function);
-	Table(UINT cols, UINT rows, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
-	Table(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
-	Table(UINT cols, UINT rows, Form& other);
-	Table(UINT cols, UINT rows, ControlForm& other);
-	Table(UINT cols, UINT rows, Table& other);
+	ATable(UINT cols, UINT rows);
+	ATable(UINT cols, UINT rows,int w,int h);
+	ATable(UINT cols, UINT rows, HANDLER_CONTAINER handlers);
+	ATable(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers);
+	ATable(UINT cols, UINT rows, std::function<BOOL(int, int, void*)>& function);
+	ATable(UINT cols, UINT rows, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	ATable(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	ATable(UINT cols, UINT rows, Form& other);
+	ATable(UINT cols, UINT rows, ControlForm& other);
+	ATable(UINT cols, UINT rows, ATable& other);
 
 #pragma endregion
 
 
 protected:
-	Table() :ControlForm(){}
-	Table(int w, int h);
-	Table(HANDLER_CONTAINER handlers);
-	Table(int w, int h, HANDLER_CONTAINER handlers);
+	ATable() :ControlForm(){}
+	ATable(int w, int h);
+	ATable(HANDLER_CONTAINER handlers);
+	ATable(int w, int h, HANDLER_CONTAINER handlers);
 	/// <summary>
 	/// </summary>
 	/// <param name="function">
 	/// Функция для управления размерами объектов
 	/// </param>
-	Table(std::function<BOOL(int, int, void*)>& function);
+	ATable(std::function<BOOL(int, int, void*)>& function);
 	/// <summary>
 	/// </summary>
 	/// <param name="function">
 	/// Функция для управления размерами объектов
 	/// </param>
-	Table(HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	ATable(HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
 	/// <summary>
 	/// </summary>
 	/// <param name="function">
 	/// Функция для управления размерами объектов
 	/// </param>
-	Table(int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	ATable(int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
 
-	Table(Form& other);
-	Table(ControlForm& other);
-	Table(Table& other);
+	ATable(Form& other);
+	ATable(ControlForm& other);
+	ATable(ATable& other);
 
 #pragma endregion
 public:
-	~Table()=default;
+	~ATable()=default;
 #pragma endregion
 public:
 	LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM);
 	
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
-		DeclarativeClasses::Table* pThis = NULL;
+		DeclarativeClasses::ATable* pThis = NULL;
 
 		if (msg == WM_NCCREATE)
 		{
 			CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
-			pThis = (DeclarativeClasses::Table*)pCreate->lpCreateParams;
+			pThis = (DeclarativeClasses::ATable*)pCreate->lpCreateParams;
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pThis);
 
 			pThis->SetWindowHandler(hWnd);
 		}
 		else
 		{
-			pThis = (DeclarativeClasses::Table*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+			pThis = (DeclarativeClasses::ATable*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 		}
 		if (pThis)
 		{
@@ -115,7 +115,7 @@ protected:
 
 	std::pair<UINT, UINT> IdToPair(UINT id) const;
 	void IdToPair(UINT id,UINT* row,UINT* col) const;
-	UINT PairToId(UINT row, UINT col);
+	UINT PairToId(UINT row, UINT col) const;
 	void SortByEnteredCell(UINT id,HWND cell);
 
 	void ResetFocus(UINT id, Direction direction);
@@ -123,7 +123,7 @@ protected:
 	static LRESULT CALLBACK EditProc
 	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
-		Table* tablePtr =reinterpret_cast<Table*>(dwRefData);
+		ATable* tablePtr =reinterpret_cast<ATable*>(dwRefData);
 
 		if (msg == WM_KEYDOWN)
 		{

@@ -4,79 +4,79 @@ namespace DeclarativeClasses
 {
 #pragma region Constructors and destructors
 #pragma region Protected
-Table::Table(int w, int h) : ControlForm(w, h)
+ATable::ATable(int w, int h) : ControlForm(w, h)
 {
 }
-Table::Table(HANDLER_CONTAINER handlers) : ControlForm(handlers)
+ATable::ATable(HANDLER_CONTAINER handlers) : ControlForm(handlers)
 {
 }
-Table::Table(int w, int h, HANDLER_CONTAINER handlers) : ControlForm(w, h, handlers)
+ATable::ATable(int w, int h, HANDLER_CONTAINER handlers) : ControlForm(w, h, handlers)
 {
 }
-Table::Table(std::function<BOOL(int, int, void*)>& function) : ControlForm(function)
+ATable::ATable(std::function<BOOL(int, int, void*)>& function) : ControlForm(function)
 {
 }
-Table::Table(HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
+ATable::ATable(HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
 	: ControlForm(handlers, function)
 {
 }
-Table::Table(int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
+ATable::ATable(int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
 	: ControlForm(w, h, handlers, function)
 {
 }
-Table::Table(Form& other) : ControlForm(other)
+ATable::ATable(Form& other) : ControlForm(other)
 {
 }
-Table::Table(ControlForm& other) : ControlForm(other)
+ATable::ATable(ControlForm& other) : ControlForm(other)
 {
 }
-Table::Table(Table& other) : ControlForm(((ControlForm&)(other)))
+ATable::ATable(ATable& other) : ControlForm(((ControlForm&)(other)))
 {
 }
 
 #pragma endregion
 #pragma region Public
-Table::Table(UINT cols, UINT rows) : Table()
+ATable::ATable(UINT cols, UINT rows) : ATable()
 {
 	SetColumnsAndRows(cols, rows);
 }
 
 
-Table::Table(UINT cols, UINT rows, int w, int h) : Table(w, h)
+ATable::ATable(UINT cols, UINT rows, int w, int h) : ATable(w, h)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, HANDLER_CONTAINER handlers) : ControlForm(handlers)
+ATable::ATable(UINT cols, UINT rows, HANDLER_CONTAINER handlers) : ControlForm(handlers)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers) : ControlForm(w, h, handlers)
+ATable::ATable(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers) : ControlForm(w, h, handlers)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, std::function<BOOL(int, int, void*)>& function) : ControlForm(function)
+ATable::ATable(UINT cols, UINT rows, std::function<BOOL(int, int, void*)>& function) : ControlForm(function)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
+ATable::ATable(UINT cols, UINT rows, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
 	: ControlForm(handlers, function)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
+ATable::ATable(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function)
 	: ControlForm(w, h, handlers, function)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, Form& other) : ControlForm(other)
+ATable::ATable(UINT cols, UINT rows, Form& other) : ControlForm(other)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, ControlForm& other) : ControlForm(other)
+ATable::ATable(UINT cols, UINT rows, ControlForm& other) : ControlForm(other)
 {
 	SetColumnsAndRows(cols, rows);
 }
-Table::Table(UINT cols, UINT rows, Table& other) : ControlForm(((ControlForm&)(other)))
+ATable::ATable(UINT cols, UINT rows, ATable& other) : ControlForm(((ControlForm&)(other)))
 {
 	SetColumnsAndRows(cols, rows);
 }
@@ -93,13 +93,13 @@ Table::Table(UINT cols, UINT rows, Table& other) : ControlForm(((ControlForm&)(o
 
 #pragma endregion
 #pragma endregion
-void Table::CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)
+void ATable::CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)
 {
 	RegisterClassExW(wClass);
 
 	CreateSelf(args);
 }
-void Table::CreateSelf(const CreateWindowArgs& args)
+void ATable::CreateSelf(const CreateWindowArgs& args)
 {
 	_x = args.X;
 	_y = args.Y;
@@ -197,17 +197,17 @@ void Table::CreateSelf(const CreateWindowArgs& args)
 	isInitilized = true;
 }
 
-const HWND& Table::GetWindowHandler()
+const HWND& ATable::GetWindowHandler()
 {
 	return _thisWindow;
 }
 
-void Table::SetWindowHandler(HWND hwnd)
+void ATable::SetWindowHandler(HWND hwnd)
 {
 	_thisWindow = hwnd;
 }
 
-BOOL Table::SetHeaders(const std::vector<std::string>& headers)
+BOOL ATable::SetHeaders(const std::vector<std::string>& headers)
 {
 	if (headers.size() != _columns)
 		return EXIT_FAILURE;
@@ -221,7 +221,7 @@ BOOL Table::SetHeaders(const std::vector<std::string>& headers)
 	return EXIT_SUCCESS;
 }
 
-BOOL Table::SetHeaders(const std::list<std::string>& headers)
+BOOL ATable::SetHeaders(const std::list<std::string>& headers)
 {
 	if(headers.size()!= _columns)
 		return EXIT_FAILURE;
@@ -235,33 +235,33 @@ BOOL Table::SetHeaders(const std::list<std::string>& headers)
 	return EXIT_FAILURE;
 }
 
-void Table::SetColumnsAndRows(UINT cols, UINT rows)
+void ATable::SetColumnsAndRows(UINT cols, UINT rows)
 {
 	_columns = cols;
 	_rows = rows;
 }
 
 
-inline bool Table::CellIsLeft(UINT& id) const
+inline bool ATable::CellIsLeft(UINT& id) const
 {
 	UINT row = id / _columns;
 	UINT column = id - _columns * row;
 	return column==1;
 }
 
-inline bool Table::CellIsRight(UINT& id) const
+inline bool ATable::CellIsRight(UINT& id) const
 {
 	UINT row = id / _columns;
 	UINT column = id - _columns * row;
 	return column==_columns-1;
 }
 
-inline bool Table::CellIsTop(UINT& id) const
+inline bool ATable::CellIsTop(UINT& id) const
 {
 	return (id / _columns)==0;
 }
 
-inline bool Table::CellIsBottom(UINT& id)
+inline bool ATable::CellIsBottom(UINT& id)
 {
 	try
 	{
@@ -293,7 +293,7 @@ inline bool Table::CellIsBottom(UINT& id)
 	}
 }
 
-std::pair<UINT, UINT> Table::IdToPair(UINT id) const
+std::pair<UINT, UINT> ATable::IdToPair(UINT id) const
 {
 	UINT row = id / _columns;
 	UINT col = id - row * _columns;
@@ -301,18 +301,18 @@ std::pair<UINT, UINT> Table::IdToPair(UINT id) const
 	return std::pair<UINT, UINT>(row,col);
 }
 
-void Table::IdToPair(UINT id, UINT* row, UINT* col) const
+void ATable::IdToPair(UINT id, UINT* row, UINT* col) const
 {
 	*row = id / _columns;
 	*col = id - (*row) * _columns;
 }
 
-UINT Table::PairToId(UINT row, UINT col)
+UINT ATable::PairToId(UINT row, UINT col) const
 {
 	return row*_columns+col;
 }
 
-void Table::SortByEnteredCell(UINT id, HWND cell)
+void ATable::SortByEnteredCell(UINT id, HWND cell)
 {
 	UINT row, col;
 	{
@@ -394,7 +394,7 @@ void Table::SortByEnteredCell(UINT id, HWND cell)
 }
 
 
-void Table::ResetFocus(UINT id, Direction direction)
+void ATable::ResetFocus(UINT id, Direction direction)
 {
 	UINT row, col,needId;
 	IdToPair(id, &row, &col);
@@ -485,14 +485,14 @@ void Table::ResetFocus(UINT id, Direction direction)
 	}
 }
 
-void Table::KillCellsFocus()
+void ATable::KillCellsFocus()
 {
 	SetFocus(_thisWindow);
 	_selectedEdit = -1;
 }
 
 
-LRESULT Table::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT ATable::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{

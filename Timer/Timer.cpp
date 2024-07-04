@@ -42,7 +42,7 @@ void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::ControlForm form;
-DeclarativeClasses::Table table(4u,50u);
+DeclarativeClasses::ATable table(4u,50u);
 
 RECT windowRect;
 
@@ -183,60 +183,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
-
-
-			// Создаем вторую ListView
-			HWND hWndListView2 = CreateWindowEx
-			(
-				WS_EX_CLIENTEDGE,
-				WC_LISTVIEW,
-				NULL,
-				WS_CHILD | WS_VISIBLE | LVS_REPORT,
-				windowRect.right/2,0, windowRect.right / 2, windowRect.bottom,
-				hWnd,
-				(HMENU)2,
-				hInst,
-				NULL
-			);
-
-			// Инициализация шрифтов и других параметров для ListView
-			LOGFONT lf2{};
-			lf2.lfHeight = 10;
-			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf2, 0);
-			HFONT hFont2 = CreateFontIndirect(&lf2);
-			SendMessage(hWndListView2, WM_SETFONT, (WPARAM)hFont2, TRUE);
-
-			// Добавляем столбцы в первую ListView
-			LVCOLUMN lvc{};
-			lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
-			lvc.cx = 100;
-
-			// Добавляем столбцы во вторую ListView
-			lvc.pszText = (wchar_t*)L"Column A";
-			ListView_InsertColumn(hWndListView2, 0, &lvc);
-			lvc.pszText = (wchar_t*)L"Column B";
-			ListView_InsertColumn(hWndListView2, 1, &lvc);
-
-			// Пример добавления элементов в первую ListView
-			LVITEM lvi{};
-			lvi.mask = LVIF_TEXT;
-
-			// Пример добавления элементов во вторую ListView
-			lvi.iItem = 0;
-			lvi.iSubItem = 0;
-			lvi.pszText = (wchar_t*)L"Item A";
-			ListView_InsertItem(hWndListView2, &lvi);
-			lvi.iSubItem = 1;
-			lvi.pszText = (wchar_t*)L"SubItem A.1";
-			ListView_SetItem(hWndListView2, &lvi);
-
-
-
-
-			ListView_SetOutlineColor(hWndListView2, RGB(255, 0, 0));
-
-
-
 			WNDCLASSEXW wcTable{};
 			wcTable.cbSize = sizeof(WNDCLASSEX);
 			wcTable.lpfnWndProc = &(table.WindowProc);
@@ -280,7 +226,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			form.AddItem("tables","addTable", &table.GetWindowHandler());
 			form.AddItem("buttons","add",&button);
-			form.AddItem("listViews", "showListView", &hWndListView2);
 			form.SetNewSize(windowRect.right, windowRect.bottom);
 			form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
 			try

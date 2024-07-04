@@ -65,29 +65,6 @@ namespace DeclarativeClasses
 						InvalidateRect(addTable,NULL, TRUE);
 						InvalidateRect(GetParent(addTable),NULL, TRUE);
 					}
-					{
-						HWND showListView = std::find_if
-						(
-							realHandlers->at("listViews").begin(),
-							realHandlers->at("listViews").end(),
-							[](const std::pair<std::string, HWND>& pair)->bool
-							{
-								return pair.first == "showListView";
-							}
-						)->second;
-						RECT showListViewRECT;
-						GetClientRect(showListView, &showListViewRECT);
-						MapWindowPoints(showListView, GetParent(showListView), (LPPOINT)(&showListViewRECT), 2);
-
-						MoveWindow
-						(
-							showListView,
-							w / 2, showListViewRECT.top-2,
-							w / 2, h - showListViewRECT.top+2, FALSE
-						);
-
-						InvalidateRect(showListView, NULL, TRUE);
-					}
 					
 
 					return EXIT_SUCCESS;
