@@ -59,7 +59,7 @@ public:
 	~ATable()=default;
 #pragma endregion
 public:
-	LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM);
+	virtual LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM)=0;
 	
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
@@ -87,8 +87,8 @@ public:
 		}
 	}
 
-	void CreateSelf(const WNDCLASSEXW* wClass,const CreateWindowArgs& args);
-	void CreateSelf(const CreateWindowArgs& args);
+	virtual void CreateSelf(const WNDCLASSEXW* wClass,const CreateWindowArgs& args)=0;
+	virtual void CreateSelf(const CreateWindowArgs& args)=0;
 
 	const HWND& GetWindowHandler();
 	void SetWindowHandler(HWND hwnd);

@@ -90,7 +90,7 @@
     <ClInclude Include="Types.h">
       <Filter>Файлы заголовков\DeclarativeClasses\TypeDefs</Filter>
     </ClInclude>
-    <ClInclude Include="Table.h">
+    <ClInclude Include="ATable.h">
       <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
     </ClInclude>
     <ClInclude Include="CreateWindowArgs.h">
@@ -101,6 +101,9 @@
     </ClInclude>
     <ClInclude Include="Functions.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="AddTable.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -122,7 +125,10 @@
     <ClCompile Include="ResizeFunctions.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
     </ClCompile>
-    <ClCompile Include="Table.cpp">
+    <ClCompile Include="ATable.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
+    </ClCompile>
+    <ClCompile Include="AddTable.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
     </ClCompile>
   </ItemGroup>

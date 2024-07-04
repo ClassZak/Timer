@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AddTable.h" />
     <ClInclude Include="AForm.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="Clock.h" />
@@ -140,18 +141,19 @@
     <ClInclude Include="Functions.h" />
     <ClInclude Include="ResizeFunctions.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Table.h" />
+    <ClInclude Include="ATable.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AddTable.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="ControlForm.cpp" />
     <ClCompile Include="Form.cpp" />
     <ClCompile Include="ResizeFunctions.cpp" />
-    <ClCompile Include="Table.cpp" />
+    <ClCompile Include="ATable.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>

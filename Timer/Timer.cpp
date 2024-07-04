@@ -15,7 +15,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "Clock.h"
 #include "Form.h"
 #include "ControlForm.h"
-#include "Table.h"
+#include "AddTable.h"
 #include <ctime>
 
 
@@ -42,7 +42,7 @@ void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::ControlForm form;
-DeclarativeClasses::ATable table(4u,50u);
+DeclarativeClasses::AddTable table(4u,50u);
 
 RECT windowRect;
 
@@ -227,7 +227,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			form.AddItem("tables","addTable", &table.GetWindowHandler());
 			form.AddItem("buttons","add",&button);
 			form.SetNewSize(windowRect.right, windowRect.bottom);
-			form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
+			//form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
 			try
 			{
 				form.Resize();
