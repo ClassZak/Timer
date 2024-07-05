@@ -110,6 +110,17 @@ namespace DeclarativeClasses
 		};
 	}
 
+	inline RECT AddTable::GetSelectedCellRect(POINT pos)
+	{
+		RECT result{};
+		result.left = (pos.x) ? columnsPositions[static_cast<std::size_t>(pos.x)-1] : 0;
+		result.right = (pos.x == 3) ? _width : columnsPositions[static_cast<std::size_t>(pos.x)];
+		result.top = ROW_HEIGHT * pos.y;
+		result.bottom = result.top + ROW_HEIGHT;
+
+		return result;
+	}
+
 	inline void AddTable::ResetColumnsPositions()
 	{
 		columnsPositions[0] = 40;
@@ -189,7 +200,92 @@ namespace DeclarativeClasses
 		{
 			POINT el = GetSelectedIndex({ LOWORD(lParam) , HIWORD(lParam) });
 
-			MessageBoxA(hWnd, (std::to_string(el.x) + ", " + std::to_string(el.y)).c_str(), "", MB_OK);
+
+			m_editWindow.position = el;
+			RECT r = GetSelectedCellRect(el);
+			r.right -= r.left;
+			r.bottom -= r.top;
+
+			if (m_editWindow.editWindow == NULL)
+			{
+				HWND edit= CreateWindowExA
+				(
+					0L,
+					"edit",
+					tableRows[el.y][el.x].c_str(),
+					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_WANTRETURN,
+					r.left,
+					r.top,
+					r.right,
+					r.bottom,
+					_thisWindow,
+					(HMENU)EDIT_WINDOW,
+					GetModuleHandle(NULL),
+					NULL
+				);
+				m_editWindow.editWindow = edit;
+
+
+				LOGFONT editLF{};
+				editLF.lfHeight = 12;
+				SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &editLF, 0);
+				editLF.lfWeight = !el.y ? FW_BOLD : FW_NORMAL;
+
+				HFONT hFont = CreateFontIndirect(&editLF);
+
+				SendMessageA(edit, WM_SETFONT, (WPARAM)hFont, TRUE);
+			}
+			else
+			{
+				MoveWindow
+				(
+					m_editWindow.editWindow,
+					r.left,
+					r.top+1,
+					r.right-1,
+					r.bottom-1,
+					FALSE
+				);
+				SetWindowTextA(m_editWindow.editWindow, tableRows[el.y][el.x].c_str());
+
+				LOGFONT editLF{};
+				editLF.lfHeight = 12;
+				SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &editLF, 0);
+				editLF.lfWeight = !el.y ? FW_BOLD : FW_NORMAL;
+
+				HFONT hFont = CreateFontIndirect(&editLF);
+
+				SendMessageA(m_editWindow.editWindow, WM_SETFONT, (WPARAM)hFont, TRUE);
+			}
+			if (!el.y)
+			{
+				LONG_PTR style = GetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE); // Получаем текущий стиль окна
+
+				
+				style &= ~ES_LEFT; // Delete ES_LEFT
+				style |= ES_CENTER | ES_READONLY; // Add header style
+
+				SetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE, style);
+			}
+			else
+			{
+				LONG_PTR style = GetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE); // Получаем текущий стиль окна
+
+
+				style &= ~ES_CENTER | ES_READONLY; // Delete header style
+				style |= ES_LEFT; // Add ES_LEFT
+
+				SetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE, style);
+			}
+
+
+
+			SetFocus(m_editWindow.editWindow);
+			
+
+			InvalidateRect(hWnd, NULL, TRUE);
+
+			//MessageBoxA(hWnd, (std::to_string(el.x) + ", " + std::to_string(el.y)).c_str(), "", MB_OK);
 			break;
 		}
 		case WM_SIZE:
@@ -227,7 +323,6 @@ namespace DeclarativeClasses
 
 				{
 					// Draw cells text
-
 					RECT r{0,0,columnsPositions[0],15};
 					HGDIOBJ oldFont;
 					HFONT headerFont{};
@@ -321,5 +416,50 @@ namespace DeclarativeClasses
 		}
 
 		return DefWindowProc(hWnd, msg, wParam, lParam);
+	}
+
+	LRESULT AddTable::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+	{
+		AddTable* tablePtr = reinterpret_cast<AddTable*>(dwRefData);
+
+
+		/*if (msg == WM_KEYDOWN)
+		{
+			if (
+				wParam == VK_RETURN or
+				wParam == VK_TAB
+				)
+			{
+				tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
+				tablePtr->KillCellsFocus();
+
+				if ((wParam == VK_RETURN and ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))) or
+					wParam == VK_TAB)
+					tablePtr->ResetFocus
+					((UINT)uIdSubclass, wParam == VK_RETURN ? DeclarativeClasses::Down : DeclarativeClasses::Right);
+
+				return 0;
+			}
+
+			if ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))
+			{
+				if
+				(
+					wParam == VK_LEFT or
+					wParam == VK_UP or
+					wParam == VK_RIGHT or
+					wParam == VK_DOWN
+				)
+				{
+					tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
+					tablePtr->KillCellsFocus();
+					tablePtr->ResetFocus((UINT)uIdSubclass, (DeclarativeClasses::Direction)(wParam - 0x24));
+
+					return 0;
+				}
+			}
+		}*/
+
+		return DefSubclassProc(hWnd, msg, wParam, lParam);
 	}
 }

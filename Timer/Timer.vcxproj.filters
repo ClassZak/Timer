@@ -105,6 +105,9 @@
     <ClInclude Include="AddTable.h">
       <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
     </ClInclude>
+    <ClInclude Include="EditWindowStruct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer.cpp">

@@ -121,49 +121,18 @@ protected:
 
 	void ResetFocus(UINT id, Direction direction);
 	void KillCellsFocus();
-	static LRESULT CALLBACK EditProc
+
+	template<class TableType>
+	static LRESULT CALLBACK EditProcStatic
 	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
-		ATable* tablePtr =reinterpret_cast<ATable*>(dwRefData);
-
-		if (msg == WM_KEYDOWN)
-		{
-			if(
-				wParam == VK_RETURN or
-				wParam == VK_TAB
-			)
-			{
-				tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
-				tablePtr->KillCellsFocus();
-
-				if((wParam == VK_RETURN and ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))) or
-					wParam == VK_TAB)
-				tablePtr->ResetFocus
-				((UINT)uIdSubclass, wParam == VK_RETURN ? DeclarativeClasses::Down : DeclarativeClasses::Right);
-
-				return 0;
-			}
-
-			if ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))
-			{
-				if (
-					wParam == VK_LEFT or
-					wParam == VK_UP or
-					wParam == VK_RIGHT or
-					wParam == VK_DOWN
-				)
-				{
-					tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
-					tablePtr->KillCellsFocus();
-					tablePtr->ResetFocus((UINT)uIdSubclass, (DeclarativeClasses::Direction)(wParam - 0x24));
-					
-					return 0;
-				}
-			}
-		}
-
-		return DefSubclassProc(hWnd, msg, wParam, lParam);
+		TableType* tablePtr =reinterpret_cast<TableType*>(dwRefData);
+		tablePtr->EditProc(hWnd, msg, wParam, lParam, uIdSubclass, dwRefData);
 	}
+
+
+	virtual LRESULT CALLBACK
+	EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) = 0;
 };
 }
 

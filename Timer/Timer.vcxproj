@@ -136,6 +136,7 @@
     <ClInclude Include="ControlForm.h" />
     <ClInclude Include="CreateWindowArgs.h" />
     <ClInclude Include="DirectionOfCells.h" />
+    <ClInclude Include="EditWindowStruct.h" />
     <ClInclude Include="Form.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Functions.h" />

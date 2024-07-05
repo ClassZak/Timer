@@ -1,19 +1,23 @@
 #pragma once
 #include "ATable.h"
+#include "EditWindowStruct.h"
 #include <array>
 #include <vector>
 #include <string>
 
+#define EDIT_WINDOW 101
+
 namespace DeclarativeClasses
 {
 class AddTable :
-    public ATable
+	public ATable
 {
 private:
 	BITMAP MainBitmapBuffer{};
 	BITMAP TempBitmapBuffer{};
 
 	std::vector<std::array<std::string, 4u>> tableRows;
+	EditWindowStruct m_editWindow{ NULL,{NULL,NULL},FALSE };
 	std::array<int, 3> columnsPositions{40,0,0};
 	const int ROW_HEIGHT=15;
 
@@ -34,13 +38,15 @@ public:
 
 
 
-    LRESULT CALLBACK Proc (HWND, UINT, WPARAM, LPARAM)override;
+	LRESULT CALLBACK Proc (HWND, UINT, WPARAM, LPARAM)override;
+	LRESULT CALLBACK EditProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR)override;
 
-    void CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)override;
-    void CreateSelf(const CreateWindowArgs& args)override;
+	void CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)override;
+	void CreateSelf(const CreateWindowArgs& args)override;
 
 private:
 	inline POINT GetSelectedIndex(POINT mousePos);
+	inline RECT GetSelectedCellRect(POINT pos);
 	inline void ResetColumnsPositions();
 	void FillNumbers();
 	void DeleteEmptyRows();
