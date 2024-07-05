@@ -211,7 +211,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				&table 
 			});
 
-			{
+			/*{
 				std::vector<std::string> headers =
 				{
 					"№",
@@ -220,14 +220,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					"Время"
 				};
 				table.SetHeaders(headers);
-			}
+			}*/
 
 		
 
 			form.AddItem("tables","addTable", &table.GetWindowHandler());
 			form.AddItem("buttons","add",&button);
 			form.SetNewSize(windowRect.right, windowRect.bottom);
-			//form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
+			form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
 			try
 			{
 				form.Resize();

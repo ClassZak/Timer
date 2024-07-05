@@ -108,7 +108,7 @@ bool Form::RemoveItem(std::string group, std::string name)
 			);
 		return EXIT_SUCCESS;
 	}
-	catch(const std::exception& ex)
+	catch(const std::exception&)
 	{
 		return EXIT_FAILURE;
 	}

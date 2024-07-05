@@ -98,6 +98,7 @@ public:
 	void SetColumnsAndRows(UINT cols, UINT rows);
 
 protected:
+	NUMBERED_HANDLER_CONTAINER cells;
 	HWND _thisWindow{};
 
 	UINT _columns =1;
@@ -106,7 +107,7 @@ protected:
 
 	bool isInitilized = false;
 
-	NUMBERED_HANDLER_CONTAINER cells;
+
 
 	inline bool CellIsLeft(UINT& id) const;
 	inline bool CellIsRight(UINT& id) const;
@@ -138,7 +139,7 @@ protected:
 				if((wParam == VK_RETURN and ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))) or
 					wParam == VK_TAB)
 				tablePtr->ResetFocus
-				(uIdSubclass, wParam == VK_RETURN ? DeclarativeClasses::Down : DeclarativeClasses::Right);
+				((UINT)uIdSubclass, wParam == VK_RETURN ? DeclarativeClasses::Down : DeclarativeClasses::Right);
 
 				return 0;
 			}
@@ -154,7 +155,7 @@ protected:
 				{
 					tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
 					tablePtr->KillCellsFocus();
-					tablePtr->ResetFocus(uIdSubclass, (DeclarativeClasses::Direction)(wParam - 0x24));
+					tablePtr->ResetFocus((UINT)uIdSubclass, (DeclarativeClasses::Direction)(wParam - 0x24));
 					
 					return 0;
 				}
