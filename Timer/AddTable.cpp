@@ -99,6 +99,7 @@ namespace DeclarativeClasses
 		isInitilized = true;
 	}
 
+#pragma region Indexes
 	inline POINT AddTable::GetSelectedIndex(POINT mousePos)
 	{
 		return
@@ -123,11 +124,45 @@ namespace DeclarativeClasses
 
 	inline void AddTable::ResetColumnsPositions()
 	{
-		columnsPositions[0] = 40;
-		columnsPositions[1] = (int)trunc((_width - 40) / 3.f) + 40;
-		columnsPositions[2] = ((int)trunc((_width - 40) / 3.f) << 1) + 40;
+		columnsPositions[0] = FIRST_COLUMN_WIDTH;
+		columnsPositions[1] = (int)trunc((_width - FIRST_COLUMN_WIDTH) / 3.f) + FIRST_COLUMN_WIDTH;
+		columnsPositions[2] = ((int)trunc((_width - FIRST_COLUMN_WIDTH) / 3.f) << 1) + FIRST_COLUMN_WIDTH;
 	}
+#pragma endregion
+	inline void AddTable::DrawCellsData(HDC& hdc)
+	{
+		RECT r{};
 
+		LOGFONT lf{};
+		lf.lfHeight = 12;
+		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+		lf.lfWeight = FW_NORMAL;
+		UINT prevAlign = SetTextAlign(hdc, TA_LEFT);
+
+		
+
+		HFONT font=CreateFontIndirect(&lf);
+		HGDIOBJ oldFont=SelectObject(hdc,font);
+
+		for (std::size_t i = 1; i != tableRows.size(); ++i)
+		{
+			for (std::size_t j = 1; j != 4; ++j)
+			{
+				r.left = columnsPositions[j - 1];
+				r.right = ((j != 3) ? columnsPositions[j] : _width);
+
+				r.top = static_cast<LONG>(ROW_HEIGHT * i);
+				r.bottom = r.top + ROW_HEIGHT;
+
+				DrawTextA(hdc, tableRows[i][j].c_str(), (int)tableRows[i][j].length(), &r, NULL);
+			}
+		}
+
+		DeleteObject(font);
+		SelectObject(hdc, oldFont);
+		SetTextAlign(hdc, prevAlign);
+	}
+#pragma region Row filling
 	void AddTable::FillNumbers()
 	{
 		std::array<std::string, 4> arr;
@@ -160,9 +195,60 @@ namespace DeclarativeClasses
 				break;
 		}
 	}
-	
-	
-	
+	int AddTable::GetFirstEmptyRow(int limitRow)
+	{
+		for (int i = 0; i != tableRows.size() and i != limitRow; ++i)
+		{
+			if (
+					tableRows[i][1] == "" and
+					tableRows[i][2] == "" and
+					tableRows[i][3] == ""
+				)
+				return i;
+		}
+
+		return -1;
+	}
+#pragma endregion
+	void AddTable::ResetFocus()
+	{
+		if (this->m_editWindow.editWindow)
+			MoveWindow(this->m_editWindow.editWindow, 0, 40, 0, 0, TRUE);
+
+		if(m_editWindow.isEnable)
+		if (m_editWindow.editWindow)
+		{
+			InsertString();
+			m_editWindow.isEnable = FALSE;
+		}
+
+		InvalidateRect(_thisWindow, NULL, TRUE);
+		SetFocus(_thisWindow);
+	}
+
+	void AddTable::InputString(const std::string& string)
+	{
+		if (!m_editWindow.isEnable)
+			return;
+
+		int row = GetFirstEmptyRow(m_editWindow.position.y);
+		if (row == -1)
+			row = m_editWindow.position.y;
+
+		tableRows[row][m_editWindow.position.x] = string;
+	}
+	inline void AddTable::InsertString()
+	{
+		char buff[0xFF]{};
+		GetWindowTextA(m_editWindow.editWindow, buff, sizeof(buff));
+
+		InputString(std::string(buff));
+	}
+
+
+
+
+#pragma region Proccesses
 	LRESULT CALLBACK AddTable::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (msg)
@@ -199,14 +285,22 @@ namespace DeclarativeClasses
 		case WM_LBUTTONDOWN:
 		{
 			POINT el = GetSelectedIndex({ LOWORD(lParam) , HIWORD(lParam) });
+			
 
+			if (m_editWindow.position.x and m_editWindow.position.y)
+			{
+				if (m_editWindow.editWindow)
+					InsertString();
+			}
+			m_editWindow.isEnable = TRUE;
 
 			m_editWindow.position = el;
 			RECT r = GetSelectedCellRect(el);
 			r.right -= r.left;
 			r.bottom -= r.top;
 
-			if (m_editWindow.editWindow == NULL)
+
+			if (!m_editWindow.editWindow)
 			{
 				HWND edit= CreateWindowExA
 				(
@@ -240,10 +334,8 @@ namespace DeclarativeClasses
 				MoveWindow
 				(
 					m_editWindow.editWindow,
-					r.left,
-					r.top+1,
-					r.right-1,
-					r.bottom-1,
+					r.left, r.top,
+					r.right, r.bottom,
 					FALSE
 				);
 				SetWindowTextA(m_editWindow.editWindow, tableRows[el.y][el.x].c_str());
@@ -257,32 +349,37 @@ namespace DeclarativeClasses
 
 				SendMessageA(m_editWindow.editWindow, WM_SETFONT, (WPARAM)hFont, TRUE);
 			}
-			if (!el.y)
+			if (!el.y or !el.x)
 			{
-				LONG_PTR style = GetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE); // Получаем текущий стиль окна
+				SendMessage(m_editWindow.editWindow, EM_SETREADONLY, TRUE, 0);
 
-				
-				style &= ~ES_LEFT; // Delete ES_LEFT
-				style |= ES_CENTER | ES_READONLY; // Add header style
+				LONG_PTR style = GetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE); // Get current style
 
-				SetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE, style);
+				if (!el.y)
+				{
+					style &= ~ES_LEFT; // Delete ES_LEFT
+					style |= ES_CENTER;// Add header style
+
+					SetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE, style);
+				}
 			}
 			else
 			{
-				LONG_PTR style = GetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE); // Получаем текущий стиль окна
+				SendMessage(m_editWindow.editWindow, EM_SETREADONLY, FALSE, 0);
+
+				LONG_PTR style = GetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE); // Get current style
 
 
-				style &= ~ES_CENTER | ES_READONLY; // Delete header style
+				style &= ~ES_CENTER; // Delete header style
 				style |= ES_LEFT; // Add ES_LEFT
 
-				SetWindowLongPtr(m_editWindow.editWindow, GWL_STYLE, style);
+				SetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE, style);
 			}
 
 
-
 			SetFocus(m_editWindow.editWindow);
-			
 
+			this->m_editWindow.position = el;
 			InvalidateRect(hWnd, NULL, TRUE);
 
 			//MessageBoxA(hWnd, (std::to_string(el.x) + ", " + std::to_string(el.y)).c_str(), "", MB_OK);
@@ -303,114 +400,7 @@ namespace DeclarativeClasses
 		}
 		case WM_PAINT:
 		{
-			if (this)
-			{
-				PAINTSTRUCT ps{};
-				HDC hdc = BeginPaint(hWnd, &ps);
-
-
-				HGDIOBJ oldPen,oldBrush;
-				HPEN gridPen = CreatePen(PS_SOLID,2,RGB(100, 100, 100));
-				HBRUSH headersBrush = CreateSolidBrush(RGB(220,220,220));
-				oldPen=SelectObject(hdc, gridPen);
-				oldBrush = SelectObject(hdc, headersBrush);
-
-				// Header background
-				RECT rect{ 1,1,_width,ROW_HEIGHT };
-				FillRect(hdc, &rect, headersBrush);
-				rect = { 0,ROW_HEIGHT,40,_height };
-				FillRect(hdc, &rect, headersBrush);
-
-				{
-					// Draw cells text
-					RECT r{0,0,columnsPositions[0],15};
-					HGDIOBJ oldFont;
-					HFONT headerFont{};
-
-
-					LOGFONT lf{};
-					lf.lfHeight = 12;
-					SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
-					lf.lfWeight = FW_BOLD;
-					UINT prevAlign = SetTextAlign(hdc, TA_CENTER);
-
-					headerFont = CreateFontIndirect(&lf);
-
-					oldFont = SelectObject(hdc, headerFont);
-					SetBkColor(hdc, RGB(220, 220, 220));
-					
-					// Draw headers
-					for (std::size_t i = 0; i != 4; ++i)
-					{
-						if (!i)
-							r.left = columnsPositions[0]/2;
-						else
-						{
-							r.left = columnsPositions[i - 1] + (int)trunc((_width - 40) / 3.f) / 2;
-							r.right = ((i != 3) ? columnsPositions[i] : _width) + (int)trunc((_width - 40) / 3.f);
-						}
-
-						TextOutA(hdc, r.left, r.top, tableRows[0][i].c_str(), (int)tableRows[0][i].length());
-					}
-
-
-					// Draw Numbers
-					DeleteObject(headerFont);
-
-					lf.lfWeight = FW_NORMAL;
-					headerFont= CreateFontIndirect(&lf);
-					SelectObject(hdc,headerFont);
-					SetTextAlign(hdc, TA_LEFT);
-
-					for (std::size_t i = 1; i != tableRows.size(); ++i)
-					{
-						r =
-						{ 
-							3,
-							(ROW_HEIGHT * (int)i),
-							columnsPositions[0],
-							(ROW_HEIGHT + ROW_HEIGHT*(int)(i))
-						};
-
-
-						TextOutA(hdc, r.left, r.top, tableRows[i][0].c_str(), (int)tableRows[i][0].length());
-					}
-
-
-					SetBkColor(hdc, RGB(0, 0, 0));
-					SetTextAlign(hdc, prevAlign);
-
-					SelectObject(hdc, oldFont);
-					DeleteObject(headerFont);
-				}
-
-				// Draw grid
-				MoveToEx(hdc, 1, 1, NULL);
-				LineTo(hdc, this->_width-1, 1);
-				LineTo(hdc, this->_width-1, this->_height-1);
-				LineTo(hdc, 1, this->_height-1);
-				LineTo(hdc, 1, 0);
-
-				for (std::size_t i = 0; i != columnsPositions.size(); ++i)
-				{
-					MoveToEx(hdc, columnsPositions[i], 0, NULL);
-					LineTo(hdc, columnsPositions[i], _height);
-				}
-				for (int h = 0; h < _height; h += ROW_HEIGHT)
-				{
-					MoveToEx(hdc, 0, h, NULL);
-					LineTo(hdc, _width, h);
-				}
-
-
-
-				SelectObject(hdc, oldPen);
-				SelectObject(hdc, oldBrush);
-				DeleteObject(gridPen);
-				DeleteObject(headersBrush);
-
-				EndPaint(hWnd, &ps);
-			}
+			Draw();
 			break;
 		}
 		}
@@ -418,10 +408,18 @@ namespace DeclarativeClasses
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
-	LRESULT AddTable::EditProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+	LRESULT AddTable::EditProc
+	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
 		AddTable* tablePtr = reinterpret_cast<AddTable*>(dwRefData);
 
+		if (msg == WM_KEYDOWN)
+		{
+			if (wParam == VK_RETURN)
+			{
+
+			}
+		}
 
 		/*if (msg == WM_KEYDOWN)
 		{
@@ -462,4 +460,123 @@ namespace DeclarativeClasses
 
 		return DefSubclassProc(hWnd, msg, wParam, lParam);
 	}
+
+
+	inline void AddTable::Draw()
+	{
+		if (this)
+		{
+			PAINTSTRUCT ps{};
+			HDC hdc = BeginPaint(_thisWindow, &ps);
+
+
+			HGDIOBJ oldPen, oldBrush;
+			HPEN gridPen = CreatePen(PS_SOLID, 2, RGB(100, 100, 100));
+			HBRUSH headersBrush = CreateSolidBrush(RGB(220, 220, 220));
+			oldPen = SelectObject(hdc, gridPen);
+			oldBrush = SelectObject(hdc, headersBrush);
+
+			// Header background
+			RECT rect{ 1,1,_width,ROW_HEIGHT };
+			FillRect(hdc, &rect, headersBrush);
+			rect = { 0,ROW_HEIGHT,FIRST_COLUMN_WIDTH,_height };
+			FillRect(hdc, &rect, headersBrush);
+
+			{
+				// Draw cells text
+				RECT r{ 0,0,columnsPositions[0],15 };
+				HGDIOBJ oldFont;
+				HFONT headerFont{};
+
+
+				LOGFONT lf{};
+				lf.lfHeight = 12;
+				SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+				lf.lfWeight = FW_BOLD;
+				UINT prevAlign = SetTextAlign(hdc, TA_CENTER);
+
+				headerFont = CreateFontIndirect(&lf);
+
+				oldFont = SelectObject(hdc, headerFont);
+				SetBkColor(hdc, RGB(220, 220, 220));
+
+				// Draw headers
+				for (std::size_t i = 0; i != 4; ++i)
+				{
+					if (!i)
+						r.left = columnsPositions[0] / 2;
+					else
+					{
+						r.left = columnsPositions[i - 1] + (int)trunc((_width - FIRST_COLUMN_WIDTH) / 3.f) / 2;
+						r.right = ((i != 3) ? columnsPositions[i] : _width) +
+							(int)trunc((_width - FIRST_COLUMN_WIDTH) / 3.f);
+					}
+
+					TextOutA(hdc, r.left, r.top, tableRows[0][i].c_str(), (int)tableRows[0][i].length());
+				}
+				SetBkColor(hdc, RGB(255, 255, 255));
+				DrawCellsData(hdc);
+				SetBkColor(hdc, RGB(220, 220, 220));
+
+				// Draw Numbers
+				DeleteObject(headerFont);
+
+				lf.lfWeight = FW_NORMAL;
+				headerFont = CreateFontIndirect(&lf);
+				SelectObject(hdc, headerFont);
+				SetTextAlign(hdc, TA_LEFT);
+
+				for (std::size_t i = 1; i != tableRows.size(); ++i)
+				{
+					r =
+					{
+						5,
+						(ROW_HEIGHT * (int)i),
+						columnsPositions[0],
+						(ROW_HEIGHT + ROW_HEIGHT * (int)(i))
+					};
+
+
+					TextOutA(hdc, r.left, r.top, tableRows[i][0].c_str(), (int)tableRows[i][0].length());
+				}
+
+
+				SetBkColor(hdc, RGB(0, 0, 0));
+				SetTextAlign(hdc, prevAlign);
+
+				SelectObject(hdc, oldFont);
+				DeleteObject(headerFont);
+			}
+
+			// Draw grid
+			MoveToEx(hdc, 1, 1, NULL);
+			LineTo(hdc, this->_width - 1, 1);
+			LineTo(hdc, this->_width - 1, this->_height - 1);
+			LineTo(hdc, 1, this->_height - 1);
+			LineTo(hdc, 1, 0);
+
+			for (std::size_t i = 0; i != columnsPositions.size(); ++i)
+			{
+				MoveToEx(hdc, columnsPositions[i], 0, NULL);
+				LineTo(hdc, columnsPositions[i], _height);
+			}
+			for (int h = 0; h < _height; h += ROW_HEIGHT)
+			{
+				MoveToEx(hdc, 0, h, NULL);
+				LineTo(hdc, _width, h);
+			}
+
+
+
+			SelectObject(hdc, oldPen);
+			SelectObject(hdc, oldBrush);
+			DeleteObject(gridPen);
+			DeleteObject(headersBrush);
+
+			EndPaint(_thisWindow, &ps);
+		}
+	}
+#pragma endregion
+
+	
 }

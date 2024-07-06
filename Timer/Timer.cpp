@@ -262,17 +262,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			default:
 				return DefWindowProc(hWnd, message, wParam, lParam);
 			}
+			if (wParam == SC_RESTORE)
+			{
+				RECT rect;
+				GetClientRect(hWnd, &rect);
+				form.SetNewSize(rect.right, rect.bottom);
+				form.Resize();
+				UpdateWindow(hWnd);
+
+				return DefWindowProcW(hWnd, message, wParam, lParam);
+			}
+			table.ResetFocus();
 			break;
 		}
-		if (wParam == SC_RESTORE)
+		case WM_LBUTTONDOWN:
 		{
-			RECT rect;
-			GetClientRect(hWnd, &rect);
-			form.SetNewSize(rect.right, rect.bottom);
-			form.Resize();
-			UpdateWindow(hWnd);
-
-			return DefWindowProcW(hWnd, message, wParam, lParam);
+			table.ResetFocus();
+			break;
 		}
 		case WM_SIZE:
 		{
@@ -290,6 +296,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
 				DestroyWindow(hWnd);
 			}
+			table.ResetFocus();
 			break;
 		}
 		case WM_GETMINMAXINFO: //Получили сообщение от Винды

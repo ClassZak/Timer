@@ -18,8 +18,9 @@ private:
 
 	std::vector<std::array<std::string, 4u>> tableRows;
 	EditWindowStruct m_editWindow{ NULL,{NULL,NULL},FALSE };
-	std::array<int, 3> columnsPositions{40,0,0};
+	std::array<int, 3> columnsPositions{25,0,0};
 	const int ROW_HEIGHT=15;
+	const int FIRST_COLUMN_WIDTH=25;
 
 public:
 	AddTable(UINT cols, UINT rows);
@@ -43,13 +44,21 @@ public:
 
 	void CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)override;
 	void CreateSelf(const CreateWindowArgs& args)override;
+	void ResetFocus();
+
+	inline void Draw();
 
 private:
 	inline POINT GetSelectedIndex(POINT mousePos);
 	inline RECT GetSelectedCellRect(POINT pos);
 	inline void ResetColumnsPositions();
+	inline void DrawCellsData(HDC& hdc);
 	void FillNumbers();
 	void DeleteEmptyRows();
+
+	int GetFirstEmptyRow(int limitRow=0xFFFF);
+	inline void InsertString();
+	void InputString(const std::string& string);
 };
 
 }
