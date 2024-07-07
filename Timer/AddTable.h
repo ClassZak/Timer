@@ -59,6 +59,9 @@ private:
 	int GetFirstEmptyRow(int limitRow=0xFFFF);
 	inline void InsertString();
 	void InputString(const std::string& string);
+
+	bool RowIsEmpty(const std::size_t i);
+	void SortCells();
 };
 
 }

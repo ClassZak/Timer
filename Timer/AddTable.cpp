@@ -185,9 +185,7 @@ namespace DeclarativeClasses
 		{
 			if
 			(
-				tableRows[i][1] == "" and
-				tableRows[i][2] == "" and
-				tableRows[i][3] == "" and
+				RowIsEmpty(i) and
 				(i*ROW_HEIGHT)>_height
 			)
 				tableRows.pop_back();
@@ -198,14 +196,8 @@ namespace DeclarativeClasses
 	int AddTable::GetFirstEmptyRow(int limitRow)
 	{
 		for (int i = 0; i != tableRows.size() and i != limitRow; ++i)
-		{
-			if (
-					tableRows[i][1] == "" and
-					tableRows[i][2] == "" and
-					tableRows[i][3] == ""
-				)
+			if (RowIsEmpty(i))
 				return i;
-		}
 
 		return -1;
 	}
@@ -221,6 +213,7 @@ namespace DeclarativeClasses
 			InsertString();
 			m_editWindow.isEnable = FALSE;
 		}
+		SortCells();
 
 		InvalidateRect(_thisWindow, NULL, TRUE);
 		SetFocus(_thisWindow);
@@ -237,6 +230,104 @@ namespace DeclarativeClasses
 
 		tableRows[row][m_editWindow.position.x] = string;
 	}
+	bool AddTable::RowIsEmpty(const std::size_t i)
+	{
+		return tableRows[i][1]=="" and tableRows[i][2] == "" and tableRows[i][3] == "";
+	}
+	void AddTable::SortCells()
+	{
+		for (std::size_t i = 1; i != tableRows.size(); ++i)
+		{
+			if (RowIsEmpty(i))
+			{
+				tableRows.erase(tableRows.begin() + i);
+				--i;
+			}
+		}
+
+		for (std::size_t i = 1; i != tableRows.size(); ++i)
+		{
+			if (tableRows[i][3] == "")
+				tableRows[i][3] = "00:00:00";
+			else
+			{
+				for (std::size_t j = 0; j != tableRows[i][3].length(); ++j)
+				{
+					if (tableRows[i][3][j] == '.')
+						tableRows[i][3][j] = ':';
+				}
+
+
+
+				for (std::size_t j=0;j!= tableRows[i][3].length();++j)
+				{
+					if (!(tableRows[i][3][j] >= '0' and tableRows[i][3][j] <= '9' or tableRows[i][3][j] == ':'))
+						tableRows[i][3].erase(j--);
+				}
+
+				bool haveSeparators = tableRows[i][3].find(':') != -1;
+
+				if (tableRows[i][3].length() == 8)
+				{
+					if (tableRows[i][3][2] == ':' and tableRows[i][3][5] == ':')
+						continue;
+				}
+				if (haveSeparators)
+				{
+					for (std::size_t j = 0; j != tableRows[i][3].length(); ++j)
+					{
+						if (tableRows[i][3][j] == ':')
+							tableRows[i][3].erase(j--);
+					}
+
+					if (tableRows[i][3].length() > 6)
+						tableRows[i][3] = tableRows[i][3].substr(0, 6);
+					else
+						if (tableRows[i][3].length() < 6)
+							while (tableRows[i][3].length() < 6)
+								tableRows[i][3] = "0" + tableRows[i][3];
+
+					tableRows[i][3].insert(2ui64, ":");
+					tableRows[i][3].insert(5ui64, ":");
+				}
+				else
+				{
+					//tm timeStr{};
+
+					for (std::size_t j = 0; j != tableRows[i][3].length(); ++j)
+						if (tableRows[i][3][j] == '0')
+							tableRows[i][3].erase(j--);
+						else
+							break;
+
+					if (tableRows[i][3].length() == 0)
+					{
+						tableRows[i][3] = "00:00:00";
+						continue;
+					}
+
+					tm timeStr = NumberToTime(std::to_unsigned_number(tableRows[i][3]));
+
+					tableRows[i][3] =
+						((timeStr.tm_hour > 9) ? std::to_string(timeStr.tm_hour) :
+							(std::string("0") + std::to_string(timeStr.tm_hour))) + ":" +
+						((timeStr.tm_min > 9) ? std::to_string(timeStr.tm_min) :
+							(std::string("0") + std::to_string(timeStr.tm_min))) + ":" +
+						((timeStr.tm_sec > 9) ? std::to_string(timeStr.tm_sec) :
+							(std::string("0") + std::to_string(timeStr.tm_sec)));
+				}
+			}
+		}
+
+
+
+
+
+		for (std::size_t i = 1; i != tableRows.size(); ++i)
+			tableRows[i][0] = std::to_string(i);
+
+		FillNumbers();
+	}
 	inline void AddTable::InsertString()
 	{
 		char buff[0xFF]{};
@@ -244,10 +335,6 @@ namespace DeclarativeClasses
 
 		InputString(std::string(buff));
 	}
-
-
-
-
 #pragma region Proccesses
 	LRESULT CALLBACK AddTable::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
@@ -381,12 +468,13 @@ namespace DeclarativeClasses
 
 			this->m_editWindow.position = el;
 			InvalidateRect(hWnd, NULL, TRUE);
-
+			SortCells();
 			//MessageBoxA(hWnd, (std::to_string(el.x) + ", " + std::to_string(el.y)).c_str(), "", MB_OK);
 			break;
 		}
 		case WM_SIZE:
 		{
+			if(LOWORD(lParam) and HIWORD(lParam))
 			SetNewSize(LOWORD(lParam), HIWORD(lParam));
 
 			ResetColumnsPositions();
@@ -577,6 +665,4 @@ namespace DeclarativeClasses
 		}
 	}
 #pragma endregion
-
-	
 }

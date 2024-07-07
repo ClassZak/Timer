@@ -153,6 +153,7 @@
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="ControlForm.cpp" />
     <ClCompile Include="Form.cpp" />
+    <ClCompile Include="Functions.cpp" />
     <ClCompile Include="ResizeFunctions.cpp" />
     <ClCompile Include="ATable.cpp" />
     <ClCompile Include="Timer.cpp" />

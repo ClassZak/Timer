@@ -3,16 +3,13 @@
 
 namespace std
 {
-	unsigned int to_unsigned_number(const string& str)
-	{
-		unsigned int number = 0;
-		for (size_t i = 0; i != str.length(); ++i)
-		{
-			if (i != 0)
-				number *= 10;
-			number += str[i] - '0';
-		}
-
-		return number;
-	}
+	unsigned int to_unsigned_number(const string& str);
 }
+
+/// <summary>
+/// Получение времени из строки с форматом HH:MM:SS
+/// </summary>
+/// <param name="timeString">Проверенная строка с форматом HH:MM:SS</param>
+/// <returns></returns>
+tm StringToTime(std::string& timeString);
+tm NumberToTime(const unsigned long seconds);

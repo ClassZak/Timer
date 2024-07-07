@@ -1,5 +1,6 @@
 #pragma once
 #include "ControlForm.h"
+#include "Functions.h"
 #include "CreateWindowArgs.h"
 #include "DirectionOfCells.h"
 #include <CommCtrl.h>

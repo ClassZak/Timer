@@ -1,5 +1,4 @@
 #include "ATable.h"
-#include "Functions.h"
 namespace DeclarativeClasses
 {
 #pragma region Constructors and destructors
