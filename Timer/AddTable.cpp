@@ -148,7 +148,7 @@ namespace DeclarativeClasses
 		{
 			for (std::size_t j = 1; j != 4; ++j)
 			{
-				r.left = columnsPositions[j - 1];
+				r.left = columnsPositions[j - 1]+5;
 				r.right = ((j != 3) ? columnsPositions[j] : _width);
 
 				r.top = static_cast<LONG>(ROW_HEIGHT * i);
@@ -236,17 +236,23 @@ namespace DeclarativeClasses
 	}
 	void AddTable::SortCells()
 	{
-		for (std::size_t i = 1; i != tableRows.size(); ++i)
-		{
-			if (RowIsEmpty(i))
-			{
-				tableRows.erase(tableRows.begin() + i);
-				--i;
-			}
-		}
+		std::set<std::size_t> rowsWithoutDescription;
 
 		for (std::size_t i = 1; i != tableRows.size(); ++i)
 		{
+			if (!tableRows[i][1].length() and !tableRows[i][2].length())
+				tableRows[i][3] = "";
+
+			if (RowIsEmpty(i))
+				tableRows.erase(tableRows.begin() + i--);
+		}
+
+
+		for (std::size_t i = 1; i != tableRows.size(); ++i)
+		{
+			if(!tableRows[i][1].length() and !tableRows[i][2].length())
+				continue;
+
 			if (tableRows[i][3] == "")
 				tableRows[i][3] = "00:00:00";
 			else
