@@ -61,7 +61,14 @@ private:
 	void InputString(const std::string& string);
 
 	bool RowIsEmpty(const std::size_t i);
+	void MoveEditWindow(POINT& newPosition);
+	void MoveEditWindowTo(POINT& newPosition, DeclarativeClasses::Direction direction);
 	void SortCells();
+
+	inline bool CellIsLeft(POINT& id);
+	inline bool CellIsRight(POINT& id);
+	inline bool CellIsTop(POINT& id);
+	inline bool CellIsBottom(POINT& id);
 };
 
 }

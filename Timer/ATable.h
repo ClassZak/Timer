@@ -128,7 +128,7 @@ protected:
 	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
 		TableType* tablePtr =reinterpret_cast<TableType*>(dwRefData);
-		tablePtr->EditProc(hWnd, msg, wParam, lParam, uIdSubclass, dwRefData);
+		return tablePtr->EditProc(hWnd, msg, wParam, lParam, uIdSubclass, dwRefData);
 	}
 
 

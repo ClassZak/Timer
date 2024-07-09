@@ -3,6 +3,11 @@
 
 namespace std
 {
+	/// <summary>
+	/// В функцию надо обязательно подавать верные входные данные
+	/// </summary>
+	/// <param name="str"></param>
+	/// <returns></returns>
 	unsigned int to_unsigned_number(const string& str)
 	{
 		unsigned int number = 0;

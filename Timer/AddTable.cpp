@@ -205,7 +205,7 @@ namespace DeclarativeClasses
 	void AddTable::ResetFocus()
 	{
 		if (this->m_editWindow.editWindow)
-			MoveWindow(this->m_editWindow.editWindow, 0, 40, 0, 0, TRUE);
+			MoveWindow(this->m_editWindow.editWindow, 0, -40, 0, 0, TRUE);
 
 		if(m_editWindow.isEnable)
 		if (m_editWindow.editWindow)
@@ -228,15 +228,221 @@ namespace DeclarativeClasses
 		if (row == -1)
 			row = m_editWindow.position.y;
 
-		tableRows[row][m_editWindow.position.x] = string;
+		if (row < tableRows.size())
+			tableRows[row][m_editWindow.position.x] = string;
 	}
+
 	bool AddTable::RowIsEmpty(const std::size_t i)
 	{
 		return tableRows[i][1]=="" and tableRows[i][2] == "" and tableRows[i][3] == "";
 	}
+
+	void AddTable::MoveEditWindow(POINT& newPosition)
+	{
+		if (m_editWindow.position.x and m_editWindow.position.y)
+		{
+			if (m_editWindow.editWindow)
+				InsertString();
+		}
+		m_editWindow.isEnable = TRUE;
+
+		m_editWindow.position = newPosition;
+		RECT r = GetSelectedCellRect(newPosition);
+		r.right -= r.left;
+		r.bottom -= r.top;
+
+
+		if (!m_editWindow.editWindow)
+		{
+			HWND edit = CreateWindowExA
+			(
+				0L,
+				"edit",
+				tableRows[newPosition.y][newPosition.x].c_str(),
+				WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_WANTRETURN,
+				r.left,
+				r.top,
+				r.right,
+				r.bottom,
+				_thisWindow,
+				(HMENU)EDIT_WINDOW,
+				GetModuleHandle(NULL),
+				NULL
+			);
+			m_editWindow.editWindow = edit;
+
+
+			LOGFONT editLF{};
+			editLF.lfHeight = 12;
+			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &editLF, 0);
+			editLF.lfWeight = !newPosition.y ? FW_BOLD : FW_NORMAL;
+
+			HFONT hFont = CreateFontIndirect(&editLF);
+
+			SendMessageA(edit, WM_SETFONT, (WPARAM)hFont, TRUE);
+		}
+		else
+		{
+			MoveWindow
+			(
+				m_editWindow.editWindow,
+				r.left, r.top,
+				r.right, r.bottom,
+				FALSE
+			);
+			SetWindowTextA(m_editWindow.editWindow, tableRows[newPosition.y][newPosition.x].c_str());
+
+			LOGFONT editLF{};
+			editLF.lfHeight = 12;
+			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &editLF, 0);
+			editLF.lfWeight = !newPosition.y ? FW_BOLD : FW_NORMAL;
+
+			HFONT hFont = CreateFontIndirect(&editLF);
+
+			SendMessageA(m_editWindow.editWindow, WM_SETFONT, (WPARAM)hFont, TRUE);
+		}
+		if (!newPosition.y or !newPosition.x)
+		{
+			SendMessage(m_editWindow.editWindow, EM_SETREADONLY, TRUE, 0);
+
+			LONG_PTR style = GetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE); // Get current style
+
+			if (!newPosition.y)
+			{
+				style &= ~ES_LEFT; // Delete ES_LEFT
+				style |= ES_CENTER;// Add header style
+
+				SetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE, style);
+			}
+		}
+		else
+		{
+			SendMessage(m_editWindow.editWindow, EM_SETREADONLY, FALSE, 0);
+
+			LONG_PTR style = GetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE); // Get current style
+
+
+			style &= ~ES_CENTER; // Delete header style
+			style |= ES_LEFT; // Add ES_LEFT
+
+			SetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE, style);
+		}
+
+		SortCells();
+		SetFocus(m_editWindow.editWindow);
+
+		this->m_editWindow.position = newPosition;
+		InvalidateRect(_thisWindow, NULL, TRUE);
+	}
+
+	inline bool AddTable::CellIsLeft(POINT& id)
+	{
+		return id.x == 1;
+	}
+	inline bool AddTable::CellIsRight(POINT& id)
+	{
+		return id.x == 3;
+	}
+	inline bool AddTable::CellIsTop(POINT& id)
+	{
+		return id.y == 1;
+	}
+	inline bool AddTable::CellIsBottom(POINT& id)
+	{
+		return id.y * ROW_HEIGHT + ROW_HEIGHT >= _height;
+	}
+
+	void AddTable::MoveEditWindowTo(POINT& newPosition, DeclarativeClasses::Direction direction)
+	{
+		POINT pos = newPosition;
+
+		if (!pos.x or !pos.y)
+		{
+			pos = { 1,1 };
+			MoveEditWindow(pos);
+			return;
+		}
+
+		switch (direction)
+		{
+			case DeclarativeClasses::Left:
+			{
+				bool isLeft = CellIsLeft(pos), isTop=CellIsTop(pos);
+				if (isLeft and isTop)
+					return;
+				else if (isLeft)
+				{
+					pos.x = 3;
+					--pos.y;
+
+					MoveEditWindow(pos);
+					break;
+				}
+
+				--pos.x;
+				MoveEditWindow(pos);
+				break;
+			}
+			case DeclarativeClasses::Up:
+			{
+				bool isLeft = CellIsLeft(pos), isTop = CellIsTop(pos);
+				if (isLeft and isTop)
+					return;
+				else if (isTop)
+				{
+					pos = { 1,1 };
+					MoveEditWindow(pos);
+					break;
+				}
+
+				--pos.y;
+				MoveEditWindow(pos);
+				break;
+			}
+			case DeclarativeClasses::Right:
+			{
+				bool isRight = CellIsRight(pos), isBottom = CellIsBottom(pos);
+				if (isRight and isBottom)
+					return;
+				else if (isRight)
+				{
+					pos.x = 1;
+					++pos.y;
+
+					MoveEditWindow(pos);
+					break;
+				}
+
+				++pos.x;
+				MoveEditWindow(pos);
+				break;
+			}
+			case DeclarativeClasses::Down:
+			{
+				bool isRight = CellIsRight(pos), isBottom = CellIsBottom(pos);
+				if (isRight and isBottom)
+					return;
+				else if (isBottom)
+				{
+					pos.x = 3;
+					MoveEditWindow(pos);
+					break;
+				}
+
+				++pos.y;
+				MoveEditWindow(pos);
+				break;
+			}
+			default:
+				break;
+		}
+	}
+
 	void AddTable::SortCells()
 	{
-		std::set<std::size_t> rowsWithoutDescription;
+		// 3 - column with time 
+		// 2 - column with description
+		// 1 - column with name
 
 		for (std::size_t i = 1; i != tableRows.size(); ++i)
 		{
@@ -246,7 +452,6 @@ namespace DeclarativeClasses
 			if (RowIsEmpty(i))
 				tableRows.erase(tableRows.begin() + i--);
 		}
-
 
 		for (std::size_t i = 1; i != tableRows.size(); ++i)
 		{
@@ -268,7 +473,7 @@ namespace DeclarativeClasses
 				for (std::size_t j=0;j!= tableRows[i][3].length();++j)
 				{
 					if (!(tableRows[i][3][j] >= '0' and tableRows[i][3][j] <= '9' or tableRows[i][3][j] == ':'))
-						tableRows[i][3].erase(j--);
+						tableRows[i][3].erase(tableRows[i][3].begin()+j--);
 				}
 
 				bool haveSeparators = tableRows[i][3].find(':') != -1;
@@ -276,7 +481,37 @@ namespace DeclarativeClasses
 				if (tableRows[i][3].length() == 8)
 				{
 					if (tableRows[i][3][2] == ':' and tableRows[i][3][5] == ':')
+					{
+						unsigned long number;
+
+						if (tableRows[i][3][0] != '0')
+						{
+							number = std::to_unsigned_number(tableRows[i][3].substr(0, 2));
+							if (number > 23)
+								tableRows[i][3] = std::to_string(23) + tableRows[i][3].substr(2);
+						}
+						if (tableRows[i][3][3] != '0')
+						{
+							number = std::to_unsigned_number(tableRows[i][3].substr(3, 2));
+							if (number > 59)
+							{
+								tableRows[i][3].erase(3ui64, 2ui64);
+								tableRows[i][3].insert(3ui64, std::to_string(59));
+							}
+						}
+						if (tableRows[i][3][6] != '0')
+						{
+							number = std::to_unsigned_number(tableRows[i][3].substr(6));
+							if (number > 59)
+							{
+								tableRows[i][3].erase(6ui64, 2ui64);
+								tableRows[i][3] += std::to_string(59);
+							}
+						}
+
+
 						continue;
+					}
 				}
 				if (haveSeparators)
 				{
@@ -302,7 +537,7 @@ namespace DeclarativeClasses
 
 					for (std::size_t j = 0; j != tableRows[i][3].length(); ++j)
 						if (tableRows[i][3][j] == '0')
-							tableRows[i][3].erase(j--);
+							tableRows[i][3].erase(j--,1);
 						else
 							break;
 
@@ -331,9 +566,16 @@ namespace DeclarativeClasses
 
 		for (std::size_t i = 1; i != tableRows.size(); ++i)
 			tableRows[i][0] = std::to_string(i);
+		for (std::size_t i = 1; i != tableRows.size(); ++i)
+			if (!RowIsEmpty(i))
+				if (tableRows[i][1] == "")
+					tableRows[i][1] = std::string("Таймер") + std::to_string(i);
 
 		FillNumbers();
 	}
+
+
+
 	inline void AddTable::InsertString()
 	{
 		char buff[0xFF]{};
@@ -348,6 +590,24 @@ namespace DeclarativeClasses
 		{
 		case WM_CREATE:
 		{
+			HWND edit = CreateWindowExA
+			(
+				0L,
+				"edit",
+				"",
+				WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_WANTRETURN,
+				0,
+				-40,
+				0,
+				0,
+				_thisWindow,
+				(HMENU)EDIT_WINDOW,
+				GetModuleHandle(NULL),
+				NULL
+			);
+			m_editWindow.editWindow = edit;
+
+			SetWindowSubclass(edit, &ATable::EditProcStatic<AddTable>, EDIT_WINDOW, (DWORD_PTR)this);
 			break;
 		}
 		case WM_COMMAND:
@@ -378,104 +638,15 @@ namespace DeclarativeClasses
 		case WM_LBUTTONDOWN:
 		{
 			POINT el = GetSelectedIndex({ LOWORD(lParam) , HIWORD(lParam) });
-			
-
-			if (m_editWindow.position.x and m_editWindow.position.y)
-			{
-				if (m_editWindow.editWindow)
-					InsertString();
-			}
-			m_editWindow.isEnable = TRUE;
-
-			m_editWindow.position = el;
-			RECT r = GetSelectedCellRect(el);
-			r.right -= r.left;
-			r.bottom -= r.top;
-
-
-			if (!m_editWindow.editWindow)
-			{
-				HWND edit= CreateWindowExA
-				(
-					0L,
-					"edit",
-					tableRows[el.y][el.x].c_str(),
-					WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_WANTRETURN,
-					r.left,
-					r.top,
-					r.right,
-					r.bottom,
-					_thisWindow,
-					(HMENU)EDIT_WINDOW,
-					GetModuleHandle(NULL),
-					NULL
-				);
-				m_editWindow.editWindow = edit;
-
-
-				LOGFONT editLF{};
-				editLF.lfHeight = 12;
-				SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &editLF, 0);
-				editLF.lfWeight = !el.y ? FW_BOLD : FW_NORMAL;
-
-				HFONT hFont = CreateFontIndirect(&editLF);
-
-				SendMessageA(edit, WM_SETFONT, (WPARAM)hFont, TRUE);
-			}
-			else
-			{
-				MoveWindow
-				(
-					m_editWindow.editWindow,
-					r.left, r.top,
-					r.right, r.bottom,
-					FALSE
-				);
-				SetWindowTextA(m_editWindow.editWindow, tableRows[el.y][el.x].c_str());
-
-				LOGFONT editLF{};
-				editLF.lfHeight = 12;
-				SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &editLF, 0);
-				editLF.lfWeight = !el.y ? FW_BOLD : FW_NORMAL;
-
-				HFONT hFont = CreateFontIndirect(&editLF);
-
-				SendMessageA(m_editWindow.editWindow, WM_SETFONT, (WPARAM)hFont, TRUE);
-			}
-			if (!el.y or !el.x)
-			{
-				SendMessage(m_editWindow.editWindow, EM_SETREADONLY, TRUE, 0);
-
-				LONG_PTR style = GetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE); // Get current style
-
-				if (!el.y)
-				{
-					style &= ~ES_LEFT; // Delete ES_LEFT
-					style |= ES_CENTER;// Add header style
-
-					SetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE, style);
-				}
-			}
-			else
-			{
-				SendMessage(m_editWindow.editWindow, EM_SETREADONLY, FALSE, 0);
-
-				LONG_PTR style = GetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE); // Get current style
-
-
-				style &= ~ES_CENTER; // Delete header style
-				style |= ES_LEFT; // Add ES_LEFT
-
-				SetWindowLongPtrA(m_editWindow.editWindow, GWL_STYLE, style);
-			}
-
-
-			SetFocus(m_editWindow.editWindow);
-
-			this->m_editWindow.position = el;
-			InvalidateRect(hWnd, NULL, TRUE);
+			MoveEditWindow(el);
+			SendMessageA
+			(
+				m_editWindow.editWindow,
+				EM_SETSEL,
+				GetWindowTextLengthA(m_editWindow.editWindow),
+				GetWindowTextLengthA(m_editWindow.editWindow)
+			);
 			SortCells();
-			//MessageBoxA(hWnd, (std::to_string(el.x) + ", " + std::to_string(el.y)).c_str(), "", MB_OK);
 			break;
 		}
 		case WM_SIZE:
@@ -509,9 +680,20 @@ namespace DeclarativeClasses
 
 		if (msg == WM_KEYDOWN)
 		{
-			if (wParam == VK_RETURN)
+			if
+			(
+				wParam == VK_RETURN or
+				wParam == VK_TAB or
+				wParam >= VK_LEFT and wParam <= VK_DOWN
+			)
 			{
-
+				if (wParam == VK_TAB)
+					MoveEditWindowTo(this->m_editWindow.position, Direction::Right);
+				if (wParam == VK_RETURN and ((GetKeyState(VK_SHIFT) & 0x8000) or (GetKeyState(VK_CONTROL) & 0x8000)))
+					MoveEditWindowTo(this->m_editWindow.position, Direction::Down);
+				if (wParam >= VK_LEFT and wParam <= VK_DOWN)
+					if ((GetKeyState(VK_SHIFT) & 0x8000) or (GetKeyState(VK_CONTROL) & 0x8000))
+						MoveEditWindowTo(this->m_editWindow.position, (Direction)(wParam - VK_LEFT + 1));
 			}
 		}
 
@@ -525,7 +707,8 @@ namespace DeclarativeClasses
 				tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
 				tablePtr->KillCellsFocus();
 
-				if ((wParam == VK_RETURN and ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))) or
+				if ((wParam == VK_RETURN and
+				((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))) or
 					wParam == VK_TAB)
 					tablePtr->ResetFocus
 					((UINT)uIdSubclass, wParam == VK_RETURN ? DeclarativeClasses::Down : DeclarativeClasses::Right);
