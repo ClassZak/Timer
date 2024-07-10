@@ -196,7 +196,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			wcTable.lpszMenuName = NULL;
 			wcTable.hIconSm = NULL;
 
-			ATOM res=RegisterClassExW(&wcTable);
+			RegisterClassExW(&wcTable);
 			table.CreateSelf
 			({
 				0,
@@ -250,6 +250,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 			case IDS_ADD_BUTTON:
 			{
+				MessageBoxA(hWnd, "Нажата кнопка добавления", "", MB_OK);
+				table.SelectFirst();
 
 				break;
 			}

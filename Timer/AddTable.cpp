@@ -179,6 +179,18 @@ namespace DeclarativeClasses
 
 			while (selectedNumbers.find(j) != selectedNumbers.end())
 				++j;
+			
+			for(std::size_t l=0; l!= tableRows.size(); ++l)
+			{
+				for (std::size_t k = 0; k != tableRows.size(); ++k)
+				{
+					if (std::to_unsigned_number(tableRows[k][0]) == j)
+					{
+						++j;
+						break;
+					}
+				}
+			}
 
 			arr[0] = std::to_string(j);
 			arr[1] = arr[2] = arr[3] = "";
@@ -575,8 +587,13 @@ namespace DeclarativeClasses
 
 
 
-		for (std::size_t i = 1; i != tableRows.size(); ++i)
-			tableRows[i][0] = std::to_string(i);
+		for (std::size_t i = 1,j=1; i != tableRows.size(); ++i,++j)
+		{
+			while (selectedNumbers.find(j)!= selectedNumbers.end())
+				++j;
+
+			tableRows[i][0] = std::to_string(j);
+		}
 		for (std::size_t i = 1; i != tableRows.size(); ++i)
 			if (!RowIsEmpty(i))
 				if (tableRows[i][1] == "")
@@ -586,9 +603,20 @@ namespace DeclarativeClasses
 					{
 						std::string chekingName= std::string("Таймер") + std::to_string(j);
 						bool tableHasName = false;
-						for (std::size_t k = 1; k != tableRows.size(); ++k)
+						for (std::size_t k = 1; k < tableRows.size(); ++k)
 						{
-							if (tableRows[k][1] == chekingName)
+							if(tableRows[k][1] == chekingName)
+							{
+								tableHasName = true;
+								break;
+							}
+
+
+							if
+							(
+								selectedNumbers.find(j) !=
+								selectedNumbers.end()
+							)
 							{
 								tableHasName = true;
 								break;
@@ -898,6 +926,14 @@ namespace DeclarativeClasses
 
 	void AddTable::SelectFirst()
 	{
+		if (RowIsEmpty(1))
+		{
+			MessageBoxA
+			(GetParent(_thisWindow), "Нет таймеров в таблице", "Заполните таблицу", MB_OK | MB_ICONWARNING);
+
+			return;
+		}
+
 		selectedNumbers.insert(std::to_unsigned_number(tableRows[1][0]));
 
 		std::array<std::string, 4u> selected =
