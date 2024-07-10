@@ -167,12 +167,20 @@ namespace DeclarativeClasses
 	{
 		std::array<std::string, 4> arr;
 
-		for (int h = ROW_HEIGHT,i=1; h <= _height; h += ROW_HEIGHT,++i)
+		for
+		(
+			int h = ROW_HEIGHT * tableRows.size(),i = tableRows.size(),j = tableRows.size();
+			h <= _height;
+			h += ROW_HEIGHT,++i,++j
+		)
 		{
 			if (i < tableRows.size())
 				continue;
 
-			arr[0] = std::to_string(i);
+			while (selectedNumbers.find(j) != selectedNumbers.end())
+				++j;
+
+			arr[0] = std::to_string(j);
 			arr[1] = arr[2] = arr[3] = "";
 
 			tableRows.push_back(arr);
@@ -242,7 +250,10 @@ namespace DeclarativeClasses
 		if (m_editWindow.position.x and m_editWindow.position.y)
 		{
 			if (m_editWindow.editWindow)
+			{
 				InsertString();
+				SortCells();
+			}
 		}
 		m_editWindow.isEnable = TRUE;
 
@@ -569,7 +580,28 @@ namespace DeclarativeClasses
 		for (std::size_t i = 1; i != tableRows.size(); ++i)
 			if (!RowIsEmpty(i))
 				if (tableRows[i][1] == "")
-					tableRows[i][1] = std::string("Таймер") + std::to_string(i);
+				{
+					unsigned long long end = 0xFFFFFFFFFFFFFFFF - selectedNumbers.size();
+					for (unsigned long long j = 1; j != end; ++j)
+					{
+						std::string chekingName= std::string("Таймер") + std::to_string(j);
+						bool tableHasName = false;
+						for (std::size_t k = 1; k != tableRows.size(); ++k)
+						{
+							if (tableRows[k][1] == chekingName)
+							{
+								tableHasName = true;
+								break;
+							}
+						}
+
+						if (!tableHasName)
+						{
+							tableRows[i][1] = chekingName;
+							break;
+						}
+					}
+				}
 
 		FillNumbers();
 	}
@@ -852,6 +884,34 @@ namespace DeclarativeClasses
 
 			EndPaint(_thisWindow, &ps);
 		}
+	}
+#pragma endregion
+#pragma region Vectors operations
+	std::set<ULONGLONG>& AddTable::GetSelectedNumbers()
+	{
+		return selectedNumbers;
+	}
+	std::vector<std::array<std::string, 4u>>& AddTable::GetSelectedData()
+	{
+		return selectedData;
+	}
+
+	void AddTable::SelectFirst()
+	{
+		selectedNumbers.insert(std::to_unsigned_number(tableRows[1][0]));
+
+		std::array<std::string, 4u> selected =
+		{ 
+			tableRows[1][0],
+			tableRows[1][1],
+			tableRows[1][2],
+			tableRows[1][3]
+		};
+		selectedData.push_back(selected);
+
+		tableRows.erase(tableRows.begin() + 1);
+
+		ResetFocus();
 	}
 #pragma endregion
 }

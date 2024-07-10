@@ -3,6 +3,7 @@
 #include "EditWindowStruct.h"
 #include <array>
 #include <vector>
+#include <set>
 #include <string>
 
 #define EDIT_WINDOW 101
@@ -13,9 +14,8 @@ class AddTable :
 	public ATable
 {
 private:
-	BITMAP MainBitmapBuffer{};
-	BITMAP TempBitmapBuffer{};
-
+	std::set<ULONGLONG> selectedNumbers;
+	std::vector<std::array<std::string, 4u>> selectedData;
 	std::vector<std::array<std::string, 4u>> tableRows;
 	EditWindowStruct m_editWindow{ NULL,{NULL,NULL},FALSE };
 	std::array<int, 3> columnsPositions{25,0,0};
@@ -47,6 +47,10 @@ public:
 	void ResetFocus();
 
 	inline void Draw();
+	
+	std::set<ULONGLONG>& GetSelectedNumbers();
+	std::vector<std::array<std::string, 4u>>& GetSelectedData();
+	void SelectFirst();
 
 private:
 	inline POINT GetSelectedIndex(POINT mousePos);
