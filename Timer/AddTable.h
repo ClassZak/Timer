@@ -6,7 +6,6 @@
 #include <set>
 #include <string>
 
-#define EDIT_WINDOW 101
 
 namespace DeclarativeClasses
 {
@@ -21,6 +20,7 @@ private:
 	std::array<int, 3> columnsPositions{25,0,0};
 	const int ROW_HEIGHT=15;
 	const int FIRST_COLUMN_WIDTH=25;
+	const int EDIT_WINDOW = 101;
 
 public:
 	AddTable(UINT cols, UINT rows);
@@ -42,7 +42,7 @@ public:
 	LRESULT CALLBACK Proc (HWND, UINT, WPARAM, LPARAM)override;
 	LRESULT CALLBACK EditProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR)override;
 
-	void CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)override;
+
 	void CreateSelf(const CreateWindowArgs& args)override;
 	void ResetFocus();
 

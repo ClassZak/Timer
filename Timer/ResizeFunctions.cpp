@@ -65,6 +65,25 @@ namespace DeclarativeClasses
 						InvalidateRect(addTable,NULL, TRUE);
 						InvalidateRect(GetParent(addTable),NULL, TRUE);
 					}
+					{
+						HWND timersTable = std::find_if
+						(
+							realHandlers->at("tables").begin(),
+							realHandlers->at("tables").end(),
+							[](const std::pair<std::string, HWND>& pair)->bool
+							{
+								return pair.first == "timersTable";
+							}
+						)->second;
+
+						MoveWindow
+						(
+							timersTable,
+							w / 2, 0,
+							w / 2, h, TRUE
+						);
+
+					}
 					
 
 					return EXIT_SUCCESS;

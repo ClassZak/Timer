@@ -13,3 +13,4 @@ namespace std
 /// <returns></returns>
 tm StringToTime(std::string& timeString);
 tm NumberToTime(const unsigned long seconds);
+std::string TimeToString(const tm& time);

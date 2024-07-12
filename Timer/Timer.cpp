@@ -16,7 +16,10 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "Form.h"
 #include "ControlForm.h"
 #include "AddTable.h"
+#include "TimersTable.h"
 #include <ctime>
+#include <mmsystem.h>
+#pragma comment(lib, "Winmm.lib")
 
 
 #define MAX_LOADSTRING 100
@@ -42,7 +45,8 @@ void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::ControlForm form;
-DeclarativeClasses::AddTable table(4u,50u);
+DeclarativeClasses::AddTable addTable(4u,50u);
+DeclarativeClasses::TimersTable timersTable(0u,0u);
 
 RECT windowRect;
 
@@ -58,6 +62,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 					 _In_ LPWSTR    lpCmdLine,
 					 _In_ int       nCmdShow)
 {
+	//PlaySoundA("clock-tick.wav", NULL, SND_LOOP | SND_ASYNC);
+	
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -185,7 +192,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			WNDCLASSEXW wcTable{};
 			wcTable.cbSize = sizeof(WNDCLASSEX);
-			wcTable.lpfnWndProc = &(table.WindowProc);
+			wcTable.lpfnWndProc = &(addTable.WindowProc);
 			wcTable.cbClsExtra = 0;
 			wcTable.cbWndExtra = 0;
 			wcTable.hInstance = hInst;
@@ -197,7 +204,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			wcTable.hIconSm = NULL;
 
 			RegisterClassExW(&wcTable);
-			table.CreateSelf
+			addTable.CreateSelf
 			({
 				0,
 				L"Table",
@@ -208,23 +215,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				hWnd,
 				NULL,
 				hInst,
-				&table 
+				&addTable 
 			});
 
-			/*{
-				std::vector<std::string> headers =
-				{
-					"№",
-					"Имя",
-					"Описание",
-					"Время"
-				};
-				table.SetHeaders(headers);
-			}*/
+			timersTable.CreateSelf
+			({
+				0,
+				L"Table",
+				L"t2",
+				WS_VISIBLE | WS_CHILD,
+				windowRect.right / 2, 0,
+				windowRect.right / 2, windowRect.bottom,
+				hWnd,
+				NULL,
+				hInst,
+				&timersTable
+			});
 
 		
 
-			form.AddItem("tables","addTable", &table.GetWindowHandler());
+			form.AddItem("tables","addTable", &addTable.GetWindowHandler());
+			form.AddItem("tables", "timersTable", &timersTable.GetWindowHandler());
 			form.AddItem("buttons","add",&button);
 			form.SetNewSize(windowRect.right, windowRect.bottom);
 			form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
@@ -237,9 +248,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
 				DestroyWindow(hWnd);
 			}
-		
-
-
 			break;
 		}
 		case WM_COMMAND:
@@ -250,8 +258,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 			case IDS_ADD_BUTTON:
 			{
-				MessageBoxA(hWnd, "Нажата кнопка добавления", "", MB_OK);
-				table.SelectFirst();
+				addTable.SelectFirst();
+				if (addTable.GetSelectedData().size())
+				{
+					InvalidateRect(timersTable.GetWindowHandler(), NULL, TRUE);
+					timersTable.AddRow(addTable.GetSelectedData()[addTable.GetSelectedData().size() - 1]);
+					addTable.GetSelectedData().pop_back();
+				}
 
 				break;
 			}
@@ -274,12 +287,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				return DefWindowProcW(hWnd, message, wParam, lParam);
 			}
-			table.ResetFocus();
+			addTable.ResetFocus();
+			break;
+		}
+		case WM_SETFOCUS:
+		{
+			if(addTable.IsInitilized())
+				addTable.ResetFocus();
 			break;
 		}
 		case WM_LBUTTONDOWN:
 		{
-			table.ResetFocus();
+			addTable.ResetFocus();
 			break;
 		}
 		case WM_SIZE:
@@ -298,7 +317,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
 				DestroyWindow(hWnd);
 			}
-			table.ResetFocus();
+			addTable.ResetFocus();
 			break;
 		}
 		case WM_GETMINMAXINFO: //Получили сообщение от Винды

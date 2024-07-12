@@ -108,6 +108,12 @@
     <ClInclude Include="EditWindowStruct.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="TimersTable.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerStruct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer.cpp">
@@ -136,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="Functions.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="TimersTable.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

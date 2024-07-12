@@ -145,6 +145,8 @@
     <ClInclude Include="ATable.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="TimersTable.h" />
+    <ClInclude Include="TimerStruct.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +159,7 @@
     <ClCompile Include="ResizeFunctions.cpp" />
     <ClCompile Include="ATable.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="TimersTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Timer.rc" />

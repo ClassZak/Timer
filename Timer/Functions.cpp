@@ -37,9 +37,9 @@ tm StringToTime(std::string& timeString)
 
 	tm result
 	{
-		std::to_unsigned_number(hoursString),
-		std::to_unsigned_number(minutesString),
-		std::to_unsigned_number(secondsString)
+		(int)std::to_unsigned_number(secondsString),
+		(int)std::to_unsigned_number(minutesString),
+		(int)std::to_unsigned_number(hoursString)
 	};
 
 	return result;
@@ -53,4 +53,12 @@ tm NumberToTime(const unsigned long seconds)
 	time.tm_hour = (seconds / 60 / 60) % 24;
 
 	return time;
+}
+
+std::string TimeToString(const tm& time)
+{
+	return
+		(time.tm_hour < 10 ? std::string("0") + std::to_string(time.tm_hour) : std::to_string(time.tm_hour)) + ":" +
+		(time.tm_min < 10 ? std::string("0") + std::to_string(time.tm_min) : std::to_string(time.tm_min)) + ":" +
+		(time.tm_sec < 10 ? std::string("0") + std::to_string(time.tm_sec) : std::to_string(time.tm_sec));
 }

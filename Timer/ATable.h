@@ -88,7 +88,6 @@ public:
 		}
 	}
 
-	virtual void CreateSelf(const WNDCLASSEXW* wClass,const CreateWindowArgs& args)=0;
 	virtual void CreateSelf(const CreateWindowArgs& args)=0;
 
 	const HWND& GetWindowHandler();
@@ -97,6 +96,7 @@ public:
 	BOOL SetHeaders(const std::list<std::string>& headers);
 
 	void SetColumnsAndRows(UINT cols, UINT rows);
+	bool IsInitilized();
 
 protected:
 	NUMBERED_HANDLER_CONTAINER cells;

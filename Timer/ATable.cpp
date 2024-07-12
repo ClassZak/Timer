@@ -136,6 +136,11 @@ void ATable::SetColumnsAndRows(UINT cols, UINT rows)
 	_rows = rows;
 }
 
+bool ATable::IsInitilized()
+{
+	return isInitilized;
+}
+
 
 inline bool ATable::CellIsLeft(UINT& id) const
 {

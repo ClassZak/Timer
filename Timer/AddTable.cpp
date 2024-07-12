@@ -52,20 +52,12 @@ namespace DeclarativeClasses
 	{
 	}
 #pragma endregion
-	void AddTable::CreateSelf(const WNDCLASSEXW* wClass, const CreateWindowArgs& args)
-	{
-		RegisterClassExW(wClass);
-
-		CreateSelf(args);
-	}
-
 	void AddTable::CreateSelf(const CreateWindowArgs& args)
 	{
 		_x = args.X;
 		_y = args.Y;
 		_width = args.nWidth;
 		_height = args.nHeight;
-		HANDLER_CONTAINER* handlers = &Form::GetHandlers();
 
 		_thisWindow =
 			CreateWindowExW
@@ -107,7 +99,7 @@ namespace DeclarativeClasses
 			mousePos.x<= columnsPositions[0] ? 0 :
 			(mousePos.x<= columnsPositions[1] ? 1 :
 			(mousePos.x<=columnsPositions[2] ? 2 : 3)),
-			mousePos.y / 15
+			mousePos.y / ROW_HEIGHT
 		};
 	}
 
@@ -169,7 +161,7 @@ namespace DeclarativeClasses
 
 		for
 		(
-			int h = ROW_HEIGHT * tableRows.size(),i = tableRows.size(),j = tableRows.size();
+			int h = (int)(ROW_HEIGHT * tableRows.size()),i = (int)tableRows.size(),j = (int)tableRows.size();
 			h <= _height;
 			h += ROW_HEIGHT,++i,++j
 		)
@@ -662,7 +654,7 @@ namespace DeclarativeClasses
 				0,
 				_thisWindow,
 				(HMENU)EDIT_WINDOW,
-				GetModuleHandle(NULL),
+				GetModuleHandleA(NULL),
 				NULL
 			);
 			m_editWindow.editWindow = edit;
@@ -757,44 +749,6 @@ namespace DeclarativeClasses
 			}
 		}
 
-		/*if (msg == WM_KEYDOWN)
-		{
-			if (
-				wParam == VK_RETURN or
-				wParam == VK_TAB
-				)
-			{
-				tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
-				tablePtr->KillCellsFocus();
-
-				if ((wParam == VK_RETURN and
-				((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))) or
-					wParam == VK_TAB)
-					tablePtr->ResetFocus
-					((UINT)uIdSubclass, wParam == VK_RETURN ? DeclarativeClasses::Down : DeclarativeClasses::Right);
-
-				return 0;
-			}
-
-			if ((GetKeyState(VK_CONTROL) & 0x8000) or (GetKeyState(VK_SHIFT) & 0x8000))
-			{
-				if
-				(
-					wParam == VK_LEFT or
-					wParam == VK_UP or
-					wParam == VK_RIGHT or
-					wParam == VK_DOWN
-				)
-				{
-					tablePtr->SortByEnteredCell((UINT)uIdSubclass, hWnd);
-					tablePtr->KillCellsFocus();
-					tablePtr->ResetFocus((UINT)uIdSubclass, (DeclarativeClasses::Direction)(wParam - 0x24));
-
-					return 0;
-				}
-			}
-		}*/
-
 		return DefSubclassProc(hWnd, msg, wParam, lParam);
 	}
 
@@ -827,7 +781,6 @@ namespace DeclarativeClasses
 
 
 				LOGFONT lf{};
-				lf.lfHeight = 12;
 				SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
 				lf.lfWeight = FW_BOLD;
 				UINT prevAlign = SetTextAlign(hdc, TA_CENTER);
