@@ -118,6 +118,7 @@ namespace DeclarativeClasses
 			{
 				if (HIWORD(lParam) > this->timers.size()*ROW_HEIGHT)
 				{
+					HideEditWindow();
 					SetFocus(GetParent(hWnd));
 				}
 				else
@@ -133,25 +134,48 @@ namespace DeclarativeClasses
 
 
 						if (col)
-							timers[rowId].paused = !timers[rowId].paused;
-						else
-							timers[rowId].stopped = true;
-
-
-						RECT updateRect
 						{
-							(!col) ? 0 : COLUMNS_WIDTHS[0],
-							(LONG)(rowId * ROW_HEIGHT),
-							(!col) ? COLUMNS_WIDTHS[0] : COLUMNS_WIDTHS[0]+ COLUMNS_WIDTHS[1],
-							(LONG)(rowId * ROW_HEIGHT + ROW_HEIGHT)
-						};
+							timers[rowId].paused = !timers[rowId].paused;
 
-						InvalidateRect(hWnd, &updateRect, TRUE);
+							RECT updateRect
+							{
+								(!col) ? 0 : COLUMNS_WIDTHS[0],
+								(LONG)(rowId * ROW_HEIGHT),
+								(!col) ? COLUMNS_WIDTHS[0] : COLUMNS_WIDTHS[0]+ COLUMNS_WIDTHS[1],
+								(LONG)(rowId * ROW_HEIGHT + ROW_HEIGHT)
+							};
+
+							InvalidateRect(hWnd, &updateRect, TRUE);
+						}
+						else
+						{
+							timers[rowId].stopped = true;
+							SendMessageA(GetParent(hWnd), WM_COMMAND, TIMER_STOPPED, timers[rowId].number);
+
+							timersNumbers.erase(timers[rowId].number);
+							StopTimer(rowId);
+
+
+							RECT updateRect
+							{
+								0,(LONG)(rowId * ROW_HEIGHT),
+								_width,(LONG)((timers.size() + 2) * ROW_HEIGHT)
+							};
+							InvalidateRect(hWnd, &updateRect, TRUE);
+							break;
+						}
+
+
 					}
 					else
 					{
 						POINT el = GetSelectedIndex({ LOWORD(lParam),HIWORD(lParam) });
+						if (el.y >= timers.size())
+							break;
+
+
 						RECT editPos = GetSelectedCellRect(el);
+
 
 						MoveWindow
 						(
@@ -160,42 +184,48 @@ namespace DeclarativeClasses
 							editPos.right - editPos.left, editPos.bottom - editPos.top,
 							TRUE
 						);
+						switch (el.x)
 						{
-							switch (el.x)
+							case 0:
 							{
-								case 0:
-								{
-									std::string editData;
-									editData = std::to_string(timers[el.y].number);
-									SetWindowTextA(m_editWindow.editWindow, editData.c_str());
-									break;
-								}
-								case 1:
-								{
-									SetWindowTextA(m_editWindow.editWindow, timers[el.y].name.c_str());
-									break;
-								}
-								case 2:
-								{
-									SetWindowTextA(m_editWindow.editWindow, timers[el.y].description.c_str());
-									break;
-								}
-								case 3:
-								{
-									std::string editData;
-									editData = TimeToString(timers[el.y].time);
-									SetWindowTextA(m_editWindow.editWindow, editData.c_str());
-									break;
-								}
-								default:
-								{
-									throw;
-									break;
-								}
+								std::string editData;
+								editData = std::to_string(timers[el.y].number);
+								SetWindowTextA(m_editWindow.editWindow, editData.c_str());
+								break;
+							}
+							case 1:
+							{
+								SetWindowTextA(m_editWindow.editWindow, timers[el.y].name.c_str());
+								break;
+							}
+							case 2:
+							{
+								SetWindowTextA(m_editWindow.editWindow, timers[el.y].description.c_str());
+								break;
+							}
+							case 3:
+							{
+								std::string editData;
+								editData = TimeToString(timers[el.y].time);
+								SetWindowTextA(m_editWindow.editWindow, editData.c_str());
+								break;
+							}
+							default:
+							{
+								throw;
+								break;
 							}
 						}
+						SendMessageA
+						(
+							m_editWindow.editWindow,
+							EM_SETSEL,
+							GetWindowTextLengthA(m_editWindow.editWindow),
+							GetWindowTextLengthA(m_editWindow.editWindow)
+						);
+
+						SetFocus(m_editWindow.editWindow);
 					}
-					
 				}
 
 
@@ -489,15 +519,46 @@ namespace DeclarativeClasses
 	inline void TimersTable::DrawTimersTime(HDC& hdc)
 	{	
 		// Draw time
+		HBRUSH alarmBrush = CreateSolidBrush(RGB(240, 70, 70));
+		HGDIOBJ oldBrush=SelectObject(hdc,alarmBrush);
+
+		bool isAlarm = false;
+
 		RECT textRect = { columnsPositions[1] + 5,0,_width, ROW_HEIGHT };
 		for (std::size_t i = 0; i != timers.size() and textRect.top < _height; ++i)
 		{
+			textRect.left -= 5;
+			if (!timers[i].time.tm_sec and !timers[i].time.tm_min and !timers[i].time.tm_hour)
+			{
+				FillRect(hdc, &textRect, alarmBrush);
+
+				if (!isAlarm)
+				{
+					SetBkColor(hdc, RGB(240, 70, 70));
+					isAlarm = true;
+				}
+			}
+			else
+			{
+				FillRect(hdc, &textRect, (HBRUSH)oldBrush);
+
+				if (isAlarm)
+				{
+					SetBkColor(hdc, RGB(240, 240, 240));
+					isAlarm = false;
+				}
+			}
+			textRect.left += 5;
+
 			std::string timeStr = TimeToString(timers[i].time);
 			DrawTextA(hdc, timeStr.c_str(), (int)timeStr.size(), &textRect, NULL);
 
 			textRect.top += ROW_HEIGHT;
 			textRect.bottom += ROW_HEIGHT;
 		}
+
+		DeleteObject(alarmBrush);
+		SelectObject(hdc, oldBrush);
 	}
 	inline void TimersTable::DrawRow(HDC& hdc,const std::size_t& rowId)
 	{
@@ -577,7 +638,8 @@ namespace DeclarativeClasses
 		TimerStruct timeStruct(data[1], data[2], StringToTime(timeString), std::to_unsigned_number(data[0]));
 
 
-		this->timers.push_back(timeStruct);
+		timers.push_back(timeStruct);
+		timersNumbers.insert(timeStruct.number);
 	}
 	void TimersTable::ClearRows()
 	{
@@ -615,7 +677,7 @@ namespace DeclarativeClasses
 			(pos.y+1)*ROW_HEIGHT
 		};
 	}
-	void TimersTable::HideEditWindow()
+	void TimersTable::HideEditWindow() const
 	{
 		MoveWindow(m_editWindow.editWindow, 0, -40, 0, 0, TRUE);
 	}

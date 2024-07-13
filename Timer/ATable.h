@@ -96,7 +96,7 @@ public:
 	BOOL SetHeaders(const std::list<std::string>& headers);
 
 	void SetColumnsAndRows(UINT cols, UINT rows);
-	bool IsInitilized();
+	bool IsInitilized() const;
 
 protected:
 	NUMBERED_HANDLER_CONTAINER cells;

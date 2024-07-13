@@ -4,6 +4,10 @@
 #include "EditWindowStruct.h"
 #include <array>
 
+#ifndef TIMER_STOPPED 
+#define TIMER_STOPPED 201
+#endif // !TIMER_STOPPED
+
 namespace DeclarativeClasses
 {
 class TimersTable :
@@ -14,6 +18,7 @@ private:
 	std::vector<TimerStruct*> triggeredTimers;
 	EditWindowStruct m_editWindow{ NULL,{NULL,NULL},FALSE };
 
+	std::set<ULONGLONG> timersNumbers;
 	std::array<int, 2> columnsPositions{ 0,0 };
 
 	const int ROW_HEIGHT = 16;
@@ -59,7 +64,7 @@ public:
 	inline POINT GetSelectedIndex(POINT mousePos);
 	inline RECT GetSelectedCellRect(POINT pos);
 
-	void HideEditWindow();
+	void HideEditWindow() const;
 };
 }
 

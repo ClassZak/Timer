@@ -136,7 +136,7 @@ void ATable::SetColumnsAndRows(UINT cols, UINT rows)
 	_rows = rows;
 }
 
-bool ATable::IsInitilized()
+bool ATable::IsInitilized() const
 {
 	return isInitilized;
 }

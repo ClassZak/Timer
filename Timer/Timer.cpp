@@ -34,10 +34,9 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-
-
-std::wstring GetAllListViewItems(HWND hwndListView);
-void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
+#ifndef TIMER_STOPPED
+#define TIMER_STOPPED 201
+#endif // !TIMER_STOPPED
 
 
 
@@ -118,22 +117,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 
-//
-//  ФУНКЦИЯ: MyRegisterClass()
-//
-//  ЦЕЛЬ: Регистрирует класс окна.
-//
-
-//
-//   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
-//
-//   ЦЕЛЬ: Сохраняет маркер экземпляра и создает главное окно
-//
-//   КОММЕНТАРИИ:
-//
-//        В этой функции маркер экземпляра сохраняется в глобальной переменной, а также
-//        создается и выводится главное окно программы.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
@@ -152,16 +135,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-//
-//  ФУНКЦИЯ: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  ЦЕЛЬ: Обрабатывает сообщения в главном окне.
-//
-//  WM_COMMAND  - обработать меню приложения
-//  WM_PAINT    - Отрисовка главного окна
-//  WM_DESTROY  - отправить сообщение о выходе и вернуться
-//
-//
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -256,6 +231,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// Разобрать выбор в меню:
 			switch (wmId)
 			{
+			case TIMER_STOPPED:
+			{
+				addTable.GetSelectedNumbers().erase((ULONGLONG)lParam);
+				break;
+			}
 			case IDS_ADD_BUTTON:
 			{
 				addTable.SelectFirst();
@@ -299,6 +279,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_LBUTTONDOWN:
 		{
 			addTable.ResetFocus();
+			timersTable.HideEditWindow();
 			break;
 		}
 		case WM_SIZE:
@@ -388,38 +369,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
-}
-
-
-
-
-
-
-
-
-std::wstring GetAllListViewItems(HWND hwndListView)
-{
-	int itemCount = ListView_GetItemCount(hwndListView);
-	int columnCount = Header_GetItemCount(ListView_GetHeader(hwndListView));
-	std::wstring allItems;
-	wchar_t itemText[256]{};
-
-	for (int i = 0; i < itemCount; ++i)
-	{
-		for (int j = 0; j < columnCount; ++j)
-		{
-			itemText[0] = L'\0';
-			ListView_GetItemText(hwndListView, i, j, itemText, 256);
-			allItems += itemText;
-			allItems += L"\t"; // Добавляем символ табуляции между элементами колонки
-		}
-		allItems += L"\n"; // Добавляем символ новой строки после каждой строки
-	}
-	return allItems;
-}
-
-void SetMinColumnWidth(NMHDR* pnmh, int minWidth)
-{
-	HD_NOTIFY* phdn = (HD_NOTIFY*)pnmh;
-	phdn->pitem->cxy = minWidth;
 }
