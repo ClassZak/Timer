@@ -2,11 +2,17 @@
 #include "ATable.h"
 #include "TimerStruct.h"
 #include "EditWindowStruct.h"
+#include <mmsystem.h>
 #include <array>
 
 #ifndef TIMER_STOPPED 
 #define TIMER_STOPPED 201
 #endif // !TIMER_STOPPED
+
+#ifndef ALARM_SOUND_PATH
+#define ALARM_SOUND_PATH "alarm.wav"
+#endif // !ALARM_SOUND_PATH
+
 
 namespace DeclarativeClasses
 {
@@ -16,15 +22,19 @@ class TimersTable :
 private:
 	std::vector<TimerStruct> timers;
 	std::vector<TimerStruct*> triggeredTimers;
-	EditWindowStruct m_editWindow{ NULL,{NULL,NULL},FALSE };
+	EditWindowStruct m_editWindow{ NULL,{-1,-1},FALSE };
 
 	std::set<ULONGLONG> timersNumbers;
 	std::array<int, 2> columnsPositions{ 0,0 };
 
-	const int ROW_HEIGHT = 16;
+	static const int ROW_HEIGHT=16;
 	const int EDIT_WINDOW = 101;
 	const int CONSERVATIVE_WIDTH = 57;
-	const std::array<int,3> COLUMNS_WIDTHS = { 16,16,25 };
+	static const std::array<int, 3> COLUMNS_WIDTHS;
+
+
+	static void CALLBACK UpdateTimersTime(HWND hWnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
+	static DWORD CALLBACK AlarmPlay(void* lParam);
 
 public:
 	TimersTable(UINT cols, UINT rows);
@@ -64,7 +74,7 @@ public:
 	inline POINT GetSelectedIndex(POINT mousePos);
 	inline RECT GetSelectedCellRect(POINT pos);
 
-	void HideEditWindow() const;
+	void HideEditWindow();
 };
 }
 

@@ -1,6 +1,8 @@
 #include "TimersTable.h"
 namespace DeclarativeClasses
 {
+	const std::array<int, 3> TimersTable::COLUMNS_WIDTHS = { 16,16,25 };
+
 #pragma region Constructors
 	TimersTable::TimersTable(UINT cols, UINT rows)
 		: ATable(cols, rows)
@@ -76,7 +78,8 @@ namespace DeclarativeClasses
 				args.lpParam
 			);
 
-
+		SetWindowLongPtrA(_thisWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+		SetTimer(_thisWindow, NULL, 1000, UpdateTimersTime);
 
 		isInitilized = true;
 	}
@@ -135,7 +138,7 @@ namespace DeclarativeClasses
 
 						if (col)
 						{
-							timers[rowId].paused = !timers[rowId].paused;
+							timers[rowId].paused = timers[rowId].triggered ? false : !timers[rowId].paused;
 
 							RECT updateRect
 							{
@@ -164,8 +167,6 @@ namespace DeclarativeClasses
 							InvalidateRect(hWnd, &updateRect, TRUE);
 							break;
 						}
-
-
 					}
 					else
 					{
@@ -184,6 +185,7 @@ namespace DeclarativeClasses
 							editPos.right - editPos.left, editPos.bottom - editPos.top,
 							TRUE
 						);
+						m_editWindow.position = el;
 						switch (el.x)
 						{
 							case 0:
@@ -632,6 +634,98 @@ namespace DeclarativeClasses
 	}
 #pragma endregion
 #pragma endregion
+#pragma region Timer threads
+	void TimersTable::UpdateTimersTime(HWND hWnd, UINT msg, UINT_PTR idEvent, DWORD dwTime)
+	{
+		TimersTable* table = reinterpret_cast<TimersTable*> (GetWindowLongPtrA(hWnd, GWLP_USERDATA));
+
+		for (std::size_t i = 0; i != table->timers.size(); ++i)
+		{
+			if (!table->timers[i].time.tm_hour and !table->timers[i].time.tm_min and !table->timers[i].time.tm_sec)
+			{
+				if (!table->timers[i].triggered)
+				{
+					table->timers[i].triggered = true;
+					table->timers[i].paused = false;
+
+					RECT updateRect
+					{
+						COLUMNS_WIDTHS[0],
+						(LONG)(i * ROW_HEIGHT),
+						COLUMNS_WIDTHS[0] + COLUMNS_WIDTHS[1],
+						(LONG)(i * ROW_HEIGHT + ROW_HEIGHT)
+					};
+
+					InvalidateRect(hWnd, &updateRect, TRUE);
+
+					CreateThread(NULL, sizeof(TimersTable) * 2, AlarmPlay, (void*)&table->timers[i], 0, NULL);
+				}
+			}
+			else
+			{
+				if (table->timers[i].paused)
+					continue;
+
+				if (--table->timers[i].time.tm_sec == -1)
+				{
+					table->timers[i].time.tm_sec = 59;
+					if (--table->timers[i].time.tm_min == -1)
+					{
+						table->timers[i].time.tm_min = 59;
+						--table->timers[i].time.tm_hour;
+					}
+				}
+
+				RECT updateRect
+				{
+					table->columnsPositions[1],
+					0,
+					table->_width,
+					table->timers.size() * TimersTable::ROW_HEIGHT
+				};
+				InvalidateRect(table->_thisWindow, &updateRect, TRUE);
+
+				if (table->m_editWindow.position.x == 3 and table->m_editWindow.position.y != -1)
+				{
+					std::string editData;
+					editData = TimeToString(table->timers[table->m_editWindow.position.y].time);
+					SetWindowTextA(table->m_editWindow.editWindow, editData.c_str());
+				}	
+			}
+		}
+
+	}
+	DWORD TimersTable::AlarmPlay(void* lParam)
+	{
+		if (lParam == NULL)
+			throw;
+
+		TimerStruct* timerStruct = reinterpret_cast<TimerStruct*>(lParam);
+
+		try
+		{
+			PlaySoundA(ALARM_SOUND_PATH, NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+
+			while (true)
+			{
+				if (timerStruct->stopped or !timerStruct->triggered)
+				{
+					PlaySoundA(NULL, NULL, 0);
+					return EXIT_SUCCESS;
+				}
+			}
+		}
+		catch (const std::exception&)
+		{
+			PlaySoundA(NULL, NULL, 0);
+			return EXIT_SUCCESS;
+		}
+
+		PlaySoundA(NULL, NULL, 0);
+		return EXIT_SUCCESS;
+	}
+#pragma endregion
+
 	void TimersTable::AddRow(const std::array<std::string, 4>& data)
 	{
 		std::string timeString = data[3];
@@ -650,6 +744,8 @@ namespace DeclarativeClasses
 		if (number > timers.size())
 			throw;
 
+		timers[number].stopped = true;
+		timers[number].triggered = false;
 		timers.erase(timers.begin() + number);
 	}
 
@@ -677,8 +773,9 @@ namespace DeclarativeClasses
 			(pos.y+1)*ROW_HEIGHT
 		};
 	}
-	void TimersTable::HideEditWindow() const
+	void TimersTable::HideEditWindow()
 	{
 		MoveWindow(m_editWindow.editWindow, 0, -40, 0, 0, TRUE);
+		m_editWindow.position.x = m_editWindow.position.y = -1;
 	}
 }
