@@ -666,7 +666,11 @@ namespace DeclarativeClasses
 
 					InvalidateRect(hWnd, &updateRect, TRUE);
 
-					CreateThread(NULL, sizeof(TimersTable) * 2, AlarmPlay, (void*)&table->timers[i], 0, NULL);
+
+					ThreadTimerStruct* threadStruct = new ThreadTimerStruct[1];
+					*threadStruct = { reinterpret_cast<void*>(table), i };
+
+					CreateThread(NULL, sizeof(TimersTable) * 2, AlarmPlay, (void*)threadStruct, 0, NULL);
 				}
 			}
 			else
@@ -698,17 +702,22 @@ namespace DeclarativeClasses
 					std::string editData;
 					editData = TimeToString(table->timers[table->m_editWindow.position.y].time);
 					SetWindowTextA(table->m_editWindow.editWindow, editData.c_str());
-				}	
+				}
 			}
 		}
-
 	}
 	DWORD TimersTable::AlarmPlay(void* lParam)
 	{
 		if (lParam == NULL)
 			throw;
 
-		TimerStruct* timerStruct = reinterpret_cast<TimerStruct*>(lParam);
+		ThreadTimerStruct* timerStruct = reinterpret_cast<ThreadTimerStruct*>(lParam);
+		TimersTable* table = reinterpret_cast<TimersTable*>(timerStruct->timersTable);
+		TimerStruct timer = table->timers[timerStruct->number];
+
+
+		std::size_t id = timerStruct->number;
+		unsigned long long number = timer.number;
 
 		try
 		{
@@ -716,7 +725,35 @@ namespace DeclarativeClasses
 
 			while (true)
 			{
-				if (timerStruct->stopped or !timerStruct->triggered)
+				if (id >= table->timers.size()-1)
+				{
+					id = -1;
+					for (std::size_t i = 0; i != table->timers.size(); ++i)
+						if (table->timers[i].number == number)
+						{
+							id = i;
+							break;
+						}
+
+					if (id == -1)
+						return EXIT_SUCCESS;
+				}
+				else
+					if (table->timers[id].number != number)
+					{
+						id = -1;
+						for (std::size_t i = 0; i != table->timers.size(); ++i)
+							if (table->timers[i].number == number)
+							{
+								id = i;
+								break;
+							}
+
+						if (id == -1)
+							return EXIT_SUCCESS;
+					}
+
+				if (table->timers[id].stopped or !table->timers[id].triggered)
 				{
 					PlaySoundA(NULL, NULL, 0);
 					return EXIT_SUCCESS;

@@ -1,6 +1,7 @@
 #pragma once
 #include "ATable.h"
 #include "TimerStruct.h"
+#include "ThreadTimerStruct.h"
 #include "EditWindowStruct.h"
 #include <mmsystem.h>
 #include <array>
