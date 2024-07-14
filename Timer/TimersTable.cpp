@@ -758,6 +758,9 @@ namespace DeclarativeClasses
 					PlaySoundA(NULL, NULL, 0);
 					return EXIT_SUCCESS;
 				}
+
+				if (!table->timers.size())
+					break;
 			}
 		}
 		catch (const std::exception&)
