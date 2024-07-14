@@ -348,6 +348,14 @@ namespace DeclarativeClasses
 
 		this->m_editWindow.position = newPosition;
 		InvalidateRect(_thisWindow, NULL, TRUE);
+
+		SendMessageA
+		(
+			m_editWindow.editWindow,
+			EM_SETSEL,
+			GetWindowTextLengthA(m_editWindow.editWindow),
+			GetWindowTextLengthA(m_editWindow.editWindow)
+		);
 	}
 
 	inline bool AddTable::CellIsLeft(POINT& id)

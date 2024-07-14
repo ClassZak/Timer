@@ -317,9 +317,17 @@ namespace DeclarativeClasses
 
 
 				DrawNumbers(hdc);
+
 				DrawTimersDescriptions(hdc);
 				SetBkColor(hdc, RGB(240,240,240));
-				DrawTimersTime(hdc);
+
+				{
+					HGDIOBJ oldBackground=
+					SelectObject(hdc, timeBackground);
+					DrawTimersTime(hdc);
+					SelectObject(hdc, oldBackground);
+				}
+
 				SetBkColor(hdc, oldBackColor);
 
 				DrawRowLine(hdc);
