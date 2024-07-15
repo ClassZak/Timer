@@ -5,6 +5,7 @@
 #include "EditWindowStruct.h"
 #include <mmsystem.h>
 #include <array>
+#include <mutex>
 
 #ifndef TIMER_STOPPED 
 #define TIMER_STOPPED 201
@@ -36,6 +37,9 @@ private:
 
 	static void CALLBACK UpdateTimersTime(HWND hWnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
 	static DWORD CALLBACK AlarmPlay(void* lParam);
+
+	static std::mutex timerMutex;
+
 
 public:
 	TimersTable(UINT cols, UINT rows);

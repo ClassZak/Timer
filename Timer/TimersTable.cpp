@@ -2,6 +2,7 @@
 namespace DeclarativeClasses
 {
 	const std::array<int, 3> TimersTable::COLUMNS_WIDTHS = { 16,16,25 };
+	std::mutex TimersTable::timerMutex = std::mutex();
 
 #pragma region Constructors
 	TimersTable::TimersTable(UINT cols, UINT rows)
@@ -671,6 +672,7 @@ namespace DeclarativeClasses
 					*threadStruct = { reinterpret_cast<void*>(table), i };
 
 					CreateThread(NULL, sizeof(TimersTable) * 2, AlarmPlay, (void*)threadStruct, 0, NULL);
+					
 				}
 			}
 			else
@@ -721,10 +723,17 @@ namespace DeclarativeClasses
 
 		try
 		{
-			PlaySoundA(ALARM_SOUND_PATH, NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+			PlaySoundA(ALARM_SOUND_PATH, NULL, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 
 			while (true)
 			{
+				timerMutex.lock();
+				if (!table->timers.size())
+				{
+					PlaySoundA(NULL, NULL, 0);
+					timerMutex.unlock();
+					return EXIT_SUCCESS;
+				}
 				if (id >= table->timers.size()-1)
 				{
 					id = -1;
@@ -736,7 +745,11 @@ namespace DeclarativeClasses
 						}
 
 					if (id == -1)
+					{
+						PlaySoundA(NULL, NULL, 0);
+						timerMutex.unlock();
 						return EXIT_SUCCESS;
+					}
 				}
 				else
 					if (table->timers[id].number != number)
@@ -750,26 +763,36 @@ namespace DeclarativeClasses
 							}
 
 						if (id == -1)
+						{
+							PlaySoundA(NULL, NULL, 0);
+							timerMutex.unlock();
 							return EXIT_SUCCESS;
+						}
 					}
 
 				if (table->timers[id].stopped or !table->timers[id].triggered)
 				{
 					PlaySoundA(NULL, NULL, 0);
+					timerMutex.unlock();
 					return EXIT_SUCCESS;
 				}
 
 				if (!table->timers.size())
 					break;
+
+				timerMutex.unlock();
+				Sleep(1000);
 			}
 		}
 		catch (const std::exception&)
 		{
 			PlaySoundA(NULL, NULL, 0);
+			timerMutex.unlock();
 			return EXIT_SUCCESS;
 		}
 
 		PlaySoundA(NULL, NULL, 0);
+		timerMutex.unlock();
 		return EXIT_SUCCESS;
 	}
 #pragma endregion
@@ -779,9 +802,10 @@ namespace DeclarativeClasses
 		std::string timeString = data[3];
 		TimerStruct timeStruct(data[1], data[2], StringToTime(timeString), std::to_unsigned_number(data[0]));
 
-
+		timerMutex.lock();
 		timers.push_back(timeStruct);
 		timersNumbers.insert(timeStruct.number);
+		timerMutex.unlock();
 	}
 	void TimersTable::ClearRows()
 	{
@@ -789,12 +813,16 @@ namespace DeclarativeClasses
 	}
 	void TimersTable::StopTimer(const std::size_t number)
 	{
+		timerMutex.lock();
+
 		if (number > timers.size())
 			throw;
 
 		timers[number].stopped = true;
 		timers[number].triggered = false;
 		timers.erase(timers.begin() + number);
+
+		timerMutex.unlock();
 	}
 
 	inline POINT TimersTable::GetSelectedIndex(POINT mousePos)
