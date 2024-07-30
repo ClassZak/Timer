@@ -40,7 +40,7 @@ private:
 
 	static std::mutex timerMutex;
 
-
+	
 public:
 	TimersTable(UINT cols, UINT rows);
 	TimersTable(UINT cols, UINT rows, int w, int h);
