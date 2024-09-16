@@ -178,4 +178,7 @@
   <ItemGroup>
     <Xml Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
 </Project>
