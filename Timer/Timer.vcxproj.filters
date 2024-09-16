@@ -55,6 +55,9 @@
     <Filter Include="Файлы заголовков\DeclarativeClasses\Table">
       <UniqueIdentifier>{d98aeead-8e75-4bd9-a5bb-ecdac6c5af50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\README show">
+      <UniqueIdentifier>{8f1e8c62-f3bb-4e83-a258-b8e562704d1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -165,5 +168,14 @@
     <Image Include="TimerIcon.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="Picture1.png">
+      <Filter>Файлы ресурсов\README show</Filter>
+    </Image>
+    <Image Include="Picture2.png">
+      <Filter>Файлы ресурсов\README show</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="README.md" />
   </ItemGroup>
 </Project>

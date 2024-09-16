@@ -166,9 +166,14 @@
     <ResourceCompile Include="Timer.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Picture1.png" />
+    <Image Include="Picture2.png" />
     <Image Include="small.ico" />
     <Image Include="Timer.ico" />
     <Image Include="TimerIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
