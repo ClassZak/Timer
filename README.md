@@ -6,3 +6,4 @@ This project was written on Windows 10 and for Windows 10, but there are not any
 
 ## Program look
 ![Image alt](https://github.com/ClassZak/Timer/raw/TableBrunch/Timer/Picture1.png)
+![Image alt](https://github.com/ClassZak/Timer/raw/TableBrunch/Timer/Picture2.png)
