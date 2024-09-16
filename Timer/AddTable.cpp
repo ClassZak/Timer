@@ -748,9 +748,25 @@ namespace DeclarativeClasses
 			)
 			{
 				if (wParam == VK_TAB)
-					MoveEditWindowTo(this->m_editWindow.position, Direction::Right);
-				if (wParam == VK_RETURN and ((GetKeyState(VK_SHIFT) & 0x8000) or (GetKeyState(VK_CONTROL) & 0x8000)))
-					MoveEditWindowTo(this->m_editWindow.position, Direction::Down);
+				{
+					if((GetKeyState(VK_CONTROL) & 0x800))
+					{
+						ResetFocus();
+						SetFocus(GetParent(_thisWindow));
+					}
+					else
+						MoveEditWindowTo(this->m_editWindow.position, Direction::Right);
+				}
+				if (wParam == VK_RETURN)
+				{
+					if (GetKeyState(VK_CONTROL) & 0x8000)
+					{
+						ResetFocus();
+						SendMessageA(GetParent(_thisWindow),WM_SETFOCUS,NULL,1);
+					}
+					else
+						MoveEditWindowTo(this->m_editWindow.position, Direction::Down);
+				}
 				if (wParam >= VK_LEFT and wParam <= VK_DOWN)
 					if ((GetKeyState(VK_SHIFT) & 0x8000) or (GetKeyState(VK_CONTROL) & 0x8000))
 						MoveEditWindowTo(this->m_editWindow.position, (Direction)(wParam - VK_LEFT + 1));

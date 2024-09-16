@@ -278,8 +278,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		case WM_SETFOCUS:
 		{
-			if(addTable.IsInitilized())
-				addTable.ResetFocus();
+			if (lParam == NULL)
+			{
+				if(addTable.IsInitilized())
+					addTable.ResetFocus();
+			}
+			else
+				SetFocus(form.GetItem("buttons","add"));
 			break;
 		}
 		case WM_LBUTTONDOWN:
