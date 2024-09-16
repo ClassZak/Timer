@@ -752,7 +752,7 @@ namespace DeclarativeClasses
 					if((GetKeyState(VK_CONTROL) & 0x800))
 					{
 						ResetFocus();
-						SetFocus(GetParent(_thisWindow));
+						SendMessageA(GetParent(_thisWindow), WM_SETFOCUS, NULL, 1);
 					}
 					else
 						MoveEditWindowTo(this->m_editWindow.position, Direction::Right);

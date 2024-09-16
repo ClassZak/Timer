@@ -156,7 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				0L,
 				"button",
 				"Добавить",
-				WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
+				WS_VISIBLE | WS_CHILD | ES_CENTER | BS_DEFPUSHBUTTON | BS_PUSHBUTTON,
 				0, windowRect.bottom-110,
 				60, 110,
 				hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
