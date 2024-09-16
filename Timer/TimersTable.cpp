@@ -165,6 +165,7 @@ namespace DeclarativeClasses
 								0,(LONG)(rowId * ROW_HEIGHT),
 								_width,(LONG)((timers.size() + 2) * ROW_HEIGHT)
 							};
+							HideEditWindow();
 							InvalidateRect(hWnd, &updateRect, TRUE);
 							break;
 						}
