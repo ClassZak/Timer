@@ -61,13 +61,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 					 _In_ LPWSTR    lpCmdLine,
 					 _In_ int       nCmdShow)
 {
-	//PlaySoundA("clock-tick.wav", NULL, SND_LOOP | SND_ASYNC);
-	
-
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-
-	// TODO: Разместите код здесь.
 
 	// Инициализация глобальных строк
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -134,10 +129,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	return TRUE;
 }
-/*void CALLBACK TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
-{
-	MessageBoxA(hwnd, "edtert", "ghfg", MB_OK);
-}*/
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -146,8 +137,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_CREATE:
 		{
-			//SetTimer(hWnd, 0, 1000, TimerProc);
-
 			GetClientRect(hWnd, &windowRect);
 
 
@@ -232,6 +221,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		case WM_COMMAND:
 		{
+			addTable.ResetFocus();
+
+
 			int wmId = LOWORD(wParam);
 			// Разобрать выбор в меню:
 			switch (wmId)
@@ -251,6 +243,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					timersTable.AddRow(addTable.GetSelectedData()[addTable.GetSelectedData().size() - 1]);
 					addTable.GetSelectedData().pop_back();
 				}
+				SetFocus(form.GetItem("buttons", "add"));
 
 				break;
 			}
@@ -273,7 +266,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				return DefWindowProcW(hWnd, message, wParam, lParam);
 			}
-			addTable.ResetFocus();
 			break;
 		}
 		case WM_SETFOCUS:

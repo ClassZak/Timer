@@ -771,6 +771,11 @@ namespace DeclarativeClasses
 					if ((GetKeyState(VK_SHIFT) & 0x8000) or (GetKeyState(VK_CONTROL) & 0x8000))
 						MoveEditWindowTo(this->m_editWindow.position, (Direction)(wParam - VK_LEFT + 1));
 			}
+			if (wParam == VK_ESCAPE)
+			{
+				ResetFocus();
+				SendMessageA(GetParent(_thisWindow),WM_SETFOCUS,NULL,1);
+			}
 		}
 
 		return DefSubclassProc(hWnd, msg, wParam, lParam);

@@ -137,9 +137,6 @@
     <ClCompile Include="ControlForm.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
     </ClCompile>
-    <ClCompile Include="ResizeFunctions.cpp">
-      <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
-    </ClCompile>
     <ClCompile Include="ATable.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
     </ClCompile>
@@ -151,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="TimersTable.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
+    </ClCompile>
+    <ClCompile Include="ResizeFunctions.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Functions\ResizeFunctions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

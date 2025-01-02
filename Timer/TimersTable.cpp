@@ -268,6 +268,15 @@ namespace DeclarativeClasses
 	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
 		TimersTable* addTable = reinterpret_cast<TimersTable*>(dwRefData);
+
+		if (msg == WM_KEYDOWN)
+		{
+			if (wParam == VK_ESCAPE)
+			{
+				HideEditWindow();
+				SendMessageA(GetParent(_thisWindow), WM_SETFOCUS, NULL, 1);
+			}
+		}
 		
 		return DefSubclassProc(hWnd, msg, wParam, lParam);
 	}

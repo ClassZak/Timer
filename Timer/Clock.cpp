@@ -67,7 +67,6 @@ void Clock::StartUpdateThread()
             rect,
             &work
         };
-
         CreateThread(NULL,
             1000,
             Clock::UpdateArrows,
