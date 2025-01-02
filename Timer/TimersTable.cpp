@@ -55,6 +55,64 @@ namespace DeclarativeClasses
 		: TimersTable(cols, rows, (ATable&)other)
 	{
 	}
+	void TimersTable::MoveEditWindow(const POINT& newPos)
+	{
+		if (newPos.y>= timers.size())
+			return;
+
+		RECT editPos = GetSelectedCellRect(newPos);
+
+		MoveWindow
+		(
+			m_editWindow.editWindow,
+			editPos.left, editPos.top,
+			editPos.right - editPos.left, editPos.bottom - editPos.top,
+			TRUE
+		);
+		m_editWindow.position = newPos;
+		switch (newPos.x)
+		{
+		case 0:
+		{
+			std::string editData;
+			editData = std::to_string(timers[newPos.y].number);
+			SetWindowTextA(m_editWindow.editWindow, editData.c_str());
+			break;
+		}
+		case 1:
+		{
+			SetWindowTextA(m_editWindow.editWindow, timers[newPos.y].name.c_str());
+			break;
+		}
+		case 2:
+		{
+			SetWindowTextA(m_editWindow.editWindow, timers[newPos.y].description.c_str());
+			break;
+		}
+		case 3:
+		{
+			std::string editData;
+			editData = TimeToString(timers[newPos.y].time);
+			SetWindowTextA(m_editWindow.editWindow, editData.c_str());
+			break;
+		}
+		default:
+		{
+			throw;
+			break;
+		}
+		}
+		SendMessageA
+		(
+			m_editWindow.editWindow,
+			EM_SETSEL,
+			GetWindowTextLengthA(m_editWindow.editWindow),
+			GetWindowTextLengthA(m_editWindow.editWindow)
+		);
+
+		HWND hwnd= SetFocus(m_editWindow.editWindow);
+		InvalidateRect(this->_thisWindow, &editPos, TRUE);
+	}
 #pragma endregion
 #pragma region Proccesses
 	void TimersTable::CreateSelf(const CreateWindowArgs& args)
@@ -118,6 +176,13 @@ namespace DeclarativeClasses
 				m_editWindow.editWindow = edit;
 				break;
 			}
+			case WM_SETFOCUS:
+			{
+				if(m_editWindow.editWindow)
+					SetFocus(m_editWindow.editWindow);
+
+				break;
+			}
 			case WM_LBUTTONDOWN:
 			{
 				if (HIWORD(lParam) > this->timers.size()*ROW_HEIGHT)
@@ -172,6 +237,7 @@ namespace DeclarativeClasses
 					}
 					else
 					{
+						//MoveEditWindow({ LOWORD(lParam),HIWORD(lParam) });
 						POINT el = GetSelectedIndex({ LOWORD(lParam),HIWORD(lParam) });
 						if (el.y >= timers.size())
 							break;
@@ -190,35 +256,35 @@ namespace DeclarativeClasses
 						m_editWindow.position = el;
 						switch (el.x)
 						{
-							case 0:
-							{
-								std::string editData;
-								editData = std::to_string(timers[el.y].number);
-								SetWindowTextA(m_editWindow.editWindow, editData.c_str());
-								break;
-							}
-							case 1:
-							{
-								SetWindowTextA(m_editWindow.editWindow, timers[el.y].name.c_str());
-								break;
-							}
-							case 2:
-							{
-								SetWindowTextA(m_editWindow.editWindow, timers[el.y].description.c_str());
-								break;
-							}
-							case 3:
-							{
-								std::string editData;
-								editData = TimeToString(timers[el.y].time);
-								SetWindowTextA(m_editWindow.editWindow, editData.c_str());
-								break;
-							}
-							default:
-							{
-								throw;
-								break;
-							}
+						case 0:
+						{
+							std::string editData;
+							editData = std::to_string(timers[el.y].number);
+							SetWindowTextA(m_editWindow.editWindow, editData.c_str());
+							break;
+						}
+						case 1:
+						{
+							SetWindowTextA(m_editWindow.editWindow, timers[el.y].name.c_str());
+							break;
+						}
+						case 2:
+						{
+							SetWindowTextA(m_editWindow.editWindow, timers[el.y].description.c_str());
+							break;
+						}
+						case 3:
+						{
+							std::string editData;
+							editData = TimeToString(timers[el.y].time);
+							SetWindowTextA(m_editWindow.editWindow, editData.c_str());
+							break;
+						}
+						default:
+						{
+							throw;
+							break;
+						}
 						}
 						SendMessageA
 						(
@@ -864,4 +930,9 @@ namespace DeclarativeClasses
 		MoveWindow(m_editWindow.editWindow, 0, -40, 0, 0, TRUE);
 		m_editWindow.position.x = m_editWindow.position.y = -1;
 	}
+	bool TimersTable::IsNotEmpty()
+{
+	return this->timers.size();
 }
+}
+

@@ -234,7 +234,7 @@ void ATable::SortByEnteredCell(UINT id, HWND cell)
 		return;
 
 	UINT needRow = 1;
-	bool rowIsEmpty = true;
+	bool rowIsNotEmpty = true;
 
 	for (UINT i = row-1; i != 0; --i)
 	{
@@ -257,11 +257,11 @@ void ATable::SortByEnteredCell(UINT id, HWND cell)
 			GetWindowTextA(it->second, buff, 0xFE);
 			if (buff[0] != '\0' and buff != "")
 			{
-				rowIsEmpty = false;
+				rowIsNotEmpty = false;
 				break;
 			}
 		}
-		if (!rowIsEmpty)
+		if (!rowIsNotEmpty)
 		{
 			needRow = i + 1;
 			break;

@@ -49,7 +49,7 @@ DeclarativeClasses::TimersTable timersTable(0u,0u);
 
 RECT windowRect;
 
-
+static HWND mainWindow;
 
 
 
@@ -100,6 +100,33 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// Цикл основного сообщения:
 	while (GetMessage(&msg, nullptr, 0, 0))
 	{
+		if (msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN)
+		{
+			if (msg.wParam == VK_TAB)
+			{
+				HWND next = GetNextDlgTabItem(mainWindow, GetFocus(), FALSE);
+
+				if (IsWindow(next))
+				{
+					if (next == form.GetItem("tables", "timersTable"))
+					{
+						if (timersTable.IsNotEmpty())
+						{
+							SetFocus(next);
+							timersTable.MoveEditWindow({0,0});
+						}
+						else
+						{
+							next= GetNextDlgTabItem(mainWindow, next, FALSE);
+							SetFocus(next);
+						}
+					}
+
+					SetFocus(next);
+					continue;
+				}
+			}
+		}
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
 			TranslateMessage(&msg);
@@ -137,15 +164,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_CREATE:
 		{
-			GetClientRect(hWnd, &windowRect);
+			mainWindow=hWnd;
 
+			GetClientRect(hWnd, &windowRect);
 
 			HWND button = CreateWindowExA
 			(
 				0L,
 				"button",
 				"Добавить",
-				WS_VISIBLE | WS_CHILD | ES_CENTER | BS_DEFPUSHBUTTON | BS_PUSHBUTTON,
+				WS_VISIBLE | WS_CHILD | ES_CENTER | BS_DEFPUSHBUTTON | BS_PUSHBUTTON | WS_TABSTOP,
 				0, windowRect.bottom-110,
 				60, 110,
 				hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
@@ -178,7 +206,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				0,
 				L"Table",
 				L"t1",
-				WS_VISIBLE | WS_CHILD,
+				WS_VISIBLE | WS_CHILD | WS_TABSTOP,
 				60, windowRect.bottom - 110,
 				windowRect.right / 2 - 60, 110,
 				hWnd,
@@ -192,7 +220,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				0,
 				L"Table",
 				L"t2",
-				WS_VISIBLE | WS_CHILD,
+				WS_VISIBLE | WS_CHILD | WS_TABSTOP,
 				windowRect.right / 2, 0,
 				windowRect.right / 2, windowRect.bottom,
 				hWnd,

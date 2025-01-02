@@ -64,8 +64,9 @@ private:
 	inline void InsertString();
 	void InputString(const std::string& string);
 
-	bool RowIsEmpty(const std::size_t i);
-	void MoveEditWindow(POINT& newPosition);
+	bool RowIsNotEmpty(const std::size_t i);
+	void MoveEditWindow(const POINT& newPosition);
+	void MoveEditWindow(const LONG& newCol, const LONG& newRow);
 	void MoveEditWindowTo(POINT& newPosition, DeclarativeClasses::Direction direction);
 	void SortCells();
 

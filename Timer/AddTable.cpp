@@ -197,7 +197,7 @@ namespace DeclarativeClasses
 		{
 			if
 			(
-				RowIsEmpty(i) and
+				RowIsNotEmpty(i) and
 				(i*ROW_HEIGHT)>_height
 			)
 				tableRows.pop_back();
@@ -208,7 +208,7 @@ namespace DeclarativeClasses
 	int AddTable::GetFirstEmptyRow(int limitRow)
 	{
 		for (int i = 0; i != tableRows.size() and i != limitRow; ++i)
-			if (RowIsEmpty(i))
+			if (RowIsNotEmpty(i))
 				return i;
 
 		return -1;
@@ -244,13 +244,16 @@ namespace DeclarativeClasses
 			tableRows[row][m_editWindow.position.x] = string;
 	}
 
-	bool AddTable::RowIsEmpty(const std::size_t i)
+	bool AddTable::RowIsNotEmpty(const std::size_t i)
 	{
 		return tableRows[i][1]=="" and tableRows[i][2] == "" and tableRows[i][3] == "";
 	}
 
-	void AddTable::MoveEditWindow(POINT& newPosition)
+	void AddTable::MoveEditWindow(const POINT& newPosition)
 	{
+		if(newPosition.y+1>tableRows.size())
+			return;
+
 		if (m_editWindow.position.x and m_editWindow.position.y)
 		{
 			if (m_editWindow.editWindow)
@@ -356,6 +359,12 @@ namespace DeclarativeClasses
 			GetWindowTextLengthA(m_editWindow.editWindow),
 			GetWindowTextLengthA(m_editWindow.editWindow)
 		);
+	}
+
+	void AddTable::MoveEditWindow(const LONG& newCol, const LONG& newRow)
+	{
+		POINT p{newCol,newRow};
+		MoveEditWindow(p);
 	}
 
 	inline bool AddTable::CellIsLeft(POINT& id)
@@ -472,7 +481,7 @@ namespace DeclarativeClasses
 			if (!tableRows[i][1].length() and !tableRows[i][2].length())
 				tableRows[i][3] = "";
 
-			if (RowIsEmpty(i))
+			if (RowIsNotEmpty(i))
 				tableRows.erase(tableRows.begin() + i--);
 		}
 
@@ -595,7 +604,7 @@ namespace DeclarativeClasses
 			tableRows[i][0] = std::to_string(j);
 		}
 		for (std::size_t i = 1; i != tableRows.size(); ++i)
-			if (!RowIsEmpty(i))
+			if (!RowIsNotEmpty(i))
 				if (tableRows[i][1] == "")
 				{
 					unsigned long long end = 0xFFFFFFFFFFFFFFFF - selectedNumbers.size();
@@ -726,6 +735,18 @@ namespace DeclarativeClasses
 		case WM_PAINT:
 		{
 			Draw();
+			break;
+		}
+		case WM_SETFOCUS:
+		{
+			MoveEditWindow(0,0);
+			SendMessageA
+			(
+				m_editWindow.editWindow,
+				EM_SETSEL,
+				GetWindowTextLengthA(m_editWindow.editWindow),
+				GetWindowTextLengthA(m_editWindow.editWindow)
+			);
 			break;
 		}
 		}
@@ -908,7 +929,7 @@ namespace DeclarativeClasses
 
 	void AddTable::SelectFirst()
 	{
-		if (RowIsEmpty(1))
+		if (RowIsNotEmpty(1))
 		{
 			MessageBoxA
 			(GetParent(_thisWindow), "Нет таймеров в таблице", "Заполните таблицу", MB_OK | MB_ICONWARNING);

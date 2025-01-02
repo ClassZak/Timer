@@ -56,6 +56,7 @@ public:
 
 	TimersTable(UINT cols, UINT rows, TimersTable& other);
 
+	void MoveEditWindow(const POINT& newPos);
 
 	LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM)override;
 	LRESULT CALLBACK EditProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR)override;
@@ -80,6 +81,7 @@ public:
 	inline RECT GetSelectedCellRect(POINT pos);
 
 	void HideEditWindow();
+	bool IsNotEmpty();
 };
 }
 
