@@ -37,11 +37,7 @@ public:
 	ControlForm(Form& other);
 	ControlForm(ControlForm& other);
 #pragma endregion
-
-
-
-
-	~ControlForm();
+	~ControlForm()=default;
 #pragma endregion
 	LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	HWND GetItem(std::string group, std::string name);

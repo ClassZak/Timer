@@ -2,7 +2,6 @@
 namespace DeclarativeClasses
 {
 #pragma region Constructors and destructors
-#pragma region Base constructors
 DeclarativeClasses::ControlForm::ControlForm()
 	: Form::Form()
 {
@@ -48,11 +47,7 @@ DeclarativeClasses::ControlForm::ControlForm(Form& other)
 {
 }
 ControlForm::ControlForm(ControlForm& other)
-	: Form::Form(other)
-{
-}
-#pragma endregion
-DeclarativeClasses::ControlForm::~ControlForm()
+	: Form::Form((Form&)other)
 {
 }
 #pragma endregion

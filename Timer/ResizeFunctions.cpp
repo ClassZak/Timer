@@ -41,48 +41,124 @@ namespace DeclarativeClasses
 
 
 					{
-						HWND addListView = std::find_if
+						HWND addTable = std::find_if
 						(
-							realHandlers->at("listViews").begin(),
-							realHandlers->at("listViews").end(),
+							realHandlers->at("tables").begin(),
+							realHandlers->at("tables").end(),
 							[](const std::pair<std::string, HWND>& pair)->bool
 							{
-								return pair.first == "addListView";
+								return pair.first == "addTable";
 							}
 						)->second;
-						RECT addListViewRECT;
-						GetClientRect(addListView, &addListViewRECT);
-						MapWindowPoints(addListView, GetParent(addListView), (LPPOINT)(&addListViewRECT), 2);
+						RECT addTableRect;
+						GetClientRect(addTable, &addTableRect);
+						MapWindowPoints(addTable, GetParent(addTable), (LPPOINT)(&addTableRect), 2);
 
 						MoveWindow
 						(
-							addListView,
-							addListViewRECT.left-2, addListViewRECT.top-2,
-							w / 2 - addListViewRECT.left+2, h - addListViewRECT.top+2, FALSE
+							addTable,
+							addTableRect.left, addTableRect.top,
+							w / 2 - addTableRect.left, h - addTableRect.top,
+							FALSE
 						);
+
+						InvalidateRect(addTable,NULL, TRUE);
+						InvalidateRect(GetParent(addTable),NULL, TRUE);
 					}
 					{
-						HWND showListView = std::find_if
+						HWND timersTable = std::find_if
 						(
-							realHandlers->at("listViews").begin(),
-							realHandlers->at("listViews").end(),
+							realHandlers->at("tables").begin(),
+							realHandlers->at("tables").end(),
 							[](const std::pair<std::string, HWND>& pair)->bool
 							{
-								return pair.first == "showListView";
+								return pair.first == "timersTable";
 							}
 						)->second;
-						RECT showListViewRECT;
-						GetClientRect(showListView, &showListViewRECT);
-						MapWindowPoints(showListView, GetParent(showListView), (LPPOINT)(&showListViewRECT), 2);
 
 						MoveWindow
 						(
-							showListView,
-							w / 2, showListViewRECT.top-2,
-							w / 2, h - showListViewRECT.top+2, FALSE
+							timersTable,
+							w / 2, 0,
+							w / 2, h, TRUE
 						);
+
 					}
 					
+
+					return EXIT_SUCCESS;
+				}
+			);
+			extern std::function<BOOL(int w, int h, void* handlers)> ResizeAddTable
+			(
+				[](int w, int h, void* handlers)->BOOL
+				{
+					HANDLER_CONTAINER* hContainer = static_cast<HANDLER_CONTAINER*>(handlers);
+
+
+					int numberWidth = 40;
+					int otherWidth = w - numberWidth;
+					
+					{
+						auto it = hContainer->at("textBoxHeader").begin();
+						++it;
+
+						RECT rect{};
+						for (int i=0; it != hContainer->at("textBoxHeader").end(); ++it,++i)
+						{
+							GetClientRect(it->second, &rect);
+							MapWindowPoints(it->second, GetParent(it->second), (LPPOINT)&rect, 2);
+
+							rect.left = 40 + otherWidth / 3 * i;
+							rect.right = rect.left + otherWidth / 3;
+
+							if (i == 2)
+								rect.right += otherWidth % 3;
+
+							MoveWindow
+							(
+								it->second,
+								rect.left, rect.top-1,
+								rect.right - rect.left, rect.bottom - rect.top+2,
+								TRUE
+							);
+						}
+					}
+					{
+						auto it = hContainer->at("textBox").begin();
+
+						RECT rect{};
+						for (int i=0; it != hContainer->at("textBox").end(); ++it,++i)
+						{
+							GetClientRect(it->second, &rect);
+							MapWindowPoints(it->second, GetParent(it->second), (LPPOINT)&rect, 2);
+
+							if ((i % 4))
+							{
+								rect.left = 40 + otherWidth / 3 * ((i-1)%4);
+								rect.right = rect.left + otherWidth / 3;
+							}
+							else
+								continue;
+
+							if (rect.top > h)
+								break;
+							
+
+							if (i %4== 3)
+								rect.right += otherWidth % 3;
+							MoveWindow
+							(
+								it->second,
+								rect.left, rect.top,
+								rect.right - rect.left, rect.bottom - rect.top,
+								FALSE
+							);
+						}
+					}
+
+
+
 
 					return EXIT_SUCCESS;
 				}

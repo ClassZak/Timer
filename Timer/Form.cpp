@@ -108,7 +108,7 @@ bool Form::RemoveItem(std::string group, std::string name)
 			);
 		return EXIT_SUCCESS;
 	}
-	catch(const std::exception& ex)
+	catch(const std::exception&)
 	{
 		return EXIT_FAILURE;
 	}
@@ -117,7 +117,7 @@ void Form::Clear()
 {
 	_handlers.clear();
 }
-const HANDLER_CONTAINER& Form::GetHandlers()const
+HANDLER_CONTAINER& Form::GetHandlers()
 {
 	return _handlers;
 }

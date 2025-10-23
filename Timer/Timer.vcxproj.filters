@@ -49,6 +49,15 @@
     <Filter Include="Файлы заголовков\DeclarativeClasses\TypeDefs">
       <UniqueIdentifier>{0a7d2da8-9254-49e8-baaa-9f3e6c219806}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\DeclarativeClasses\Table">
+      <UniqueIdentifier>{5434a3fb-c53b-4b29-a33c-ac027b5e081d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\DeclarativeClasses\Table">
+      <UniqueIdentifier>{d98aeead-8e75-4bd9-a5bb-ecdac6c5af50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы ресурсов\README show">
+      <UniqueIdentifier>{8f1e8c62-f3bb-4e83-a258-b8e562704d1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -84,6 +93,33 @@
     <ClInclude Include="Types.h">
       <Filter>Файлы заголовков\DeclarativeClasses\TypeDefs</Filter>
     </ClInclude>
+    <ClInclude Include="ATable.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="CreateWindowArgs.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionOfCells.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="Functions.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="AddTable.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="EditWindowStruct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="TimersTable.h">
+      <Filter>Файлы заголовков\DeclarativeClasses\Table</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerStruct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadTimerStruct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer.cpp">
@@ -101,8 +137,20 @@
     <ClCompile Include="ControlForm.cpp">
       <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
     </ClCompile>
+    <ClCompile Include="ATable.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
+    </ClCompile>
+    <ClCompile Include="AddTable.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="TimersTable.cpp">
+      <Filter>Исходные файлы\DeclarativeClasses\Table</Filter>
+    </ClCompile>
     <ClCompile Include="ResizeFunctions.cpp">
-      <Filter>Исходные файлы\DeclarativeClasses\Form</Filter>
+      <Filter>Исходные файлы\DeclarativeClasses\Functions\ResizeFunctions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -120,5 +168,14 @@
     <Image Include="TimerIcon.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="Picture1.png">
+      <Filter>Файлы ресурсов\README show</Filter>
+    </Image>
+    <Image Include="Picture2.png">
+      <Filter>Файлы ресурсов\README show</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
   </ItemGroup>
 </Project>

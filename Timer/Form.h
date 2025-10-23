@@ -54,7 +54,8 @@ public:
 	void Clear();
 private:
 	HANDLER_CONTAINER _handlers{};
-	int _width = 0, _height = 0;
+	
+protected:
 	/// <summary>
 	/// Функция для управления размерами объектов
 	/// </summary>
@@ -63,8 +64,10 @@ private:
 	{
 		return EXIT_FAILURE;
 	};
-protected:
-	const HANDLER_CONTAINER& GetHandlers()const;
+	HANDLER_CONTAINER& GetHandlers();
+
+	int _width = 0, _height = 0;
+	int _x = 0; int _y = 0;
 };
 }
 

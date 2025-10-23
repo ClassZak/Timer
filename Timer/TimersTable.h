@@ -1,0 +1,87 @@
+#pragma once
+#include "ATable.h"
+#include "TimerStruct.h"
+#include "ThreadTimerStruct.h"
+#include "EditWindowStruct.h"
+#include <mmsystem.h>
+#include <array>
+#include <mutex>
+
+#ifndef TIMER_STOPPED 
+#define TIMER_STOPPED 201
+#endif // !TIMER_STOPPED
+
+#ifndef ALARM_SOUND_PATH
+#define ALARM_SOUND_PATH "alarm.wav"
+#endif // !ALARM_SOUND_PATH
+
+
+namespace DeclarativeClasses
+{
+class TimersTable :
+	public ATable
+{
+private:
+	std::vector<TimerStruct> timers;
+	std::vector<TimerStruct*> triggeredTimers;
+	EditWindowStruct m_editWindow{ NULL,{-1,-1},FALSE };
+
+	std::set<ULONGLONG> timersNumbers;
+	std::array<int, 2> columnsPositions{ 0,0 };
+
+	static const int ROW_HEIGHT=16;
+	const int EDIT_WINDOW = 101;
+	const int CONSERVATIVE_WIDTH = 57;
+	static const std::array<int, 3> COLUMNS_WIDTHS;
+
+
+	static void CALLBACK UpdateTimersTime(HWND hWnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
+	static DWORD CALLBACK AlarmPlay(void* lParam);
+
+	static std::mutex timerMutex;
+
+	
+public:
+	TimersTable(UINT cols, UINT rows);
+	TimersTable(UINT cols, UINT rows, int w, int h);
+	TimersTable(UINT cols, UINT rows, HANDLER_CONTAINER handlers);
+	TimersTable(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers);
+	TimersTable(UINT cols, UINT rows, std::function<BOOL(int, int, void*)>& function);
+	TimersTable(UINT cols, UINT rows, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	TimersTable
+	(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	TimersTable(UINT cols, UINT rows, Form& other);
+	TimersTable(UINT cols, UINT rows, ControlForm& other);
+	TimersTable(UINT cols, UINT rows, ATable& other);
+
+	TimersTable(UINT cols, UINT rows, TimersTable& other);
+
+	void MoveEditWindow(const POINT& newPos);
+
+	LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM)override;
+	LRESULT CALLBACK EditProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR)override;
+
+
+	void CreateSelf(const CreateWindowArgs& args)override;
+
+	void AddRow(const std::array<std::string,4>& data);
+	void ClearRows();
+	void StopTimer(const std::size_t number);
+	inline void Draw();
+	inline void DrawRow(HDC& hdc,const std::size_t& rowId = 0);
+	inline void DrawStopButtons(HDC& hdc);
+	inline void DrawPauseButtons(HDC& hdc);
+	inline void DrawRowLine(HDC& hdc);
+	inline void DrawColumnsLines(HDC& hdc);
+	inline void DrawNumbers(HDC& hdc);
+	inline void DrawTimersDescriptions(HDC& hdc);
+	inline void DrawTimersTime(HDC& hdc);
+
+	inline POINT GetSelectedIndex(POINT mousePos);
+	inline RECT GetSelectedCellRect(POINT pos);
+
+	void HideEditWindow();
+	bool IsNotEmpty();
+};
+}
+

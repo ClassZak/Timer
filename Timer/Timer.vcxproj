@@ -129,33 +129,51 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AddTable.h" />
     <ClInclude Include="AForm.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="ControlForm.h" />
+    <ClInclude Include="CreateWindowArgs.h" />
+    <ClInclude Include="DirectionOfCells.h" />
+    <ClInclude Include="EditWindowStruct.h" />
     <ClInclude Include="Form.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Functions.h" />
     <ClInclude Include="ResizeFunctions.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="ATable.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ThreadTimerStruct.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="TimersTable.h" />
+    <ClInclude Include="TimerStruct.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AddTable.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="ControlForm.cpp" />
     <ClCompile Include="Form.cpp" />
+    <ClCompile Include="Functions.cpp" />
     <ClCompile Include="ResizeFunctions.cpp" />
+    <ClCompile Include="ATable.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="TimersTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Timer.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Picture1.png" />
+    <Image Include="Picture2.png" />
     <Image Include="small.ico" />
     <Image Include="Timer.ico" />
     <Image Include="TimerIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

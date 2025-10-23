@@ -1,0 +1,80 @@
+#pragma once
+#include "ATable.h"
+#include "EditWindowStruct.h"
+#include <array>
+#include <vector>
+#include <set>
+#include <string>
+
+
+namespace DeclarativeClasses
+{
+class AddTable :
+	public ATable
+{
+private:
+	std::set<ULONGLONG> selectedNumbers;
+	std::vector<std::array<std::string, 4u>> selectedData;
+	std::vector<std::array<std::string, 4u>> tableRows;
+	EditWindowStruct m_editWindow{ NULL,{NULL,NULL},FALSE };
+	std::array<int, 3> columnsPositions{25,0,0};
+	const int ROW_HEIGHT=15;
+	const int FIRST_COLUMN_WIDTH=25;
+	const int EDIT_WINDOW = 101;
+
+public:
+	AddTable(UINT cols, UINT rows);
+	AddTable(UINT cols, UINT rows, int w, int h);
+	AddTable(UINT cols, UINT rows, HANDLER_CONTAINER handlers);
+	AddTable(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers);
+	AddTable(UINT cols, UINT rows, std::function<BOOL(int, int, void*)>& function);
+	AddTable(UINT cols, UINT rows, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	AddTable
+	(UINT cols, UINT rows, int w, int h, HANDLER_CONTAINER handlers, std::function<BOOL(int, int, void*)>& function);
+	AddTable(UINT cols, UINT rows, Form& other);
+	AddTable(UINT cols, UINT rows, ControlForm& other);
+	AddTable(UINT cols, UINT rows, ATable& other);
+
+	AddTable(UINT cols, UINT rows, AddTable& other);
+
+
+
+	LRESULT CALLBACK Proc (HWND, UINT, WPARAM, LPARAM)override;
+	LRESULT CALLBACK EditProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR)override;
+
+
+	void CreateSelf(const CreateWindowArgs& args)override;
+	void ResetFocus();
+
+	inline void Draw();
+	
+	std::set<ULONGLONG>& GetSelectedNumbers();
+	std::vector<std::array<std::string, 4u>>& GetSelectedData();
+	void SelectFirst();
+
+private:
+	inline POINT GetSelectedIndex(POINT mousePos);
+	inline RECT GetSelectedCellRect(POINT pos);
+	inline void ResetColumnsPositions();
+	inline void DrawCellsData(HDC& hdc);
+	void FillNumbers();
+	void DeleteEmptyRows();
+
+	int GetFirstEmptyRow(int limitRow=0xFFFF);
+	inline void InsertString();
+	void InputString(const std::string& string);
+
+	bool RowIsNotEmpty(const std::size_t i);
+	void MoveEditWindow(const POINT& newPosition);
+	void MoveEditWindow(const LONG& newCol, const LONG& newRow);
+	void MoveEditWindowTo(POINT& newPosition, DeclarativeClasses::Direction direction);
+	void SortCells();
+
+	inline bool CellIsLeft(POINT& id);
+	inline bool CellIsRight(POINT& id);
+	inline bool CellIsTop(POINT& id);
+	inline bool CellIsBottom(POINT& id);
+};
+
+}
+

@@ -15,7 +15,11 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "Clock.h"
 #include "Form.h"
 #include "ControlForm.h"
+#include "AddTable.h"
+#include "TimersTable.h"
 #include <ctime>
+#include <mmsystem.h>
+#pragma comment(lib, "Winmm.lib")
 
 
 #define MAX_LOADSTRING 100
@@ -30,10 +34,9 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-
-
-std::wstring GetAllListViewItems(HWND hwndListView);
-void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
+#ifndef TIMER_STOPPED
+#define TIMER_STOPPED 201
+#endif // !TIMER_STOPPED
 
 
 
@@ -41,10 +44,12 @@ void SetMinColumnWidth(NMHDR* pnmh, int minWidth);
 
 Clock clockObj(100, { 100+3,100 +3});
 DeclarativeClasses::ControlForm form;
+DeclarativeClasses::AddTable addTable(4u,50u);
+DeclarativeClasses::TimersTable timersTable(0u,0u);
 
 RECT windowRect;
 
-
+static HWND mainWindow;
 
 
 
@@ -52,375 +57,347 @@ RECT windowRect;
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+					 _In_opt_ HINSTANCE hPrevInstance,
+					 _In_ LPWSTR    lpCmdLine,
+					 _In_ int       nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Разместите код здесь.
+	// Инициализация глобальных строк
+	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	LoadStringW(hInstance, IDC_TIMER, szWindowClass, MAX_LOADSTRING);
 
-    // Инициализация глобальных строк
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_TIMER, szWindowClass, MAX_LOADSTRING);
+	WNDCLASSEXW wcex{ NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL };
 
-    WNDCLASSEXW wcex{ NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL };
+	wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = WndProc;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TIMER_ICON));
+	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_TIMER);
+	wcex.lpszClassName = szWindowClass;
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_TIMER_ICON));
 
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = WndProc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = 0;
-    wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TIMER_ICON));
-    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_TIMER);
-    wcex.lpszClassName = szWindowClass;
-    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_TIMER_ICON));
-
-    RegisterClassExW(&wcex);
+	RegisterClassExW(&wcex);
 
 
-    // Выполнить инициализацию приложения:
-    if (!InitInstance (hInstance, nCmdShow))
-    {
-        return FALSE;
-    }
+	// Выполнить инициализацию приложения:
+	if (!InitInstance (hInstance, nCmdShow))
+	{
+		return FALSE;
+	}
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_TIMER));
+	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_TIMER));
 
-    MSG msg;
+	MSG msg;
 
-    // Цикл основного сообщения:
-    while (GetMessage(&msg, nullptr, 0, 0))
-    {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
+	// Цикл основного сообщения:
+	while (GetMessage(&msg, nullptr, 0, 0))
+	{
+		if (msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN)
+		{
+			if (msg.wParam == VK_TAB)
+			{
+				HWND next = GetNextDlgTabItem(mainWindow, GetFocus(), FALSE);
 
-    return (int) msg.wParam;
+				if (IsWindow(next))
+				{
+					if (next == form.GetItem("tables", "timersTable"))
+					{
+						if (timersTable.IsNotEmpty())
+						{
+							SetFocus(next);
+							timersTable.MoveEditWindow({0,0});
+						}
+						else
+						{
+							next= GetNextDlgTabItem(mainWindow, next, FALSE);
+							SetFocus(next);
+						}
+					}
+
+					SetFocus(next);
+					continue;
+				}
+			}
+		}
+		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	return (int) msg.wParam;
 }
 
 
 
-//
-//  ФУНКЦИЯ: MyRegisterClass()
-//
-//  ЦЕЛЬ: Регистрирует класс окна.
-//
-
-//
-//   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
-//
-//   ЦЕЛЬ: Сохраняет маркер экземпляра и создает главное окно
-//
-//   КОММЕНТАРИИ:
-//
-//        В этой функции маркер экземпляра сохраняется в глобальной переменной, а также
-//        создается и выводится главное окно программы.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
+	hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, IDS_DEFAULT_WINDOW_WIDTH, IDS_DEFAULT_WINDOW_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, 0, IDS_DEFAULT_WINDOW_WIDTH, IDS_DEFAULT_WINDOW_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+	if (!hWnd)
+	{
+		return FALSE;
+	}
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+	ShowWindow(hWnd, nCmdShow);
+	UpdateWindow(hWnd);
 
-   return TRUE;
+	return TRUE;
 }
 
-//
-//  ФУНКЦИЯ: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  ЦЕЛЬ: Обрабатывает сообщения в главном окне.
-//
-//  WM_COMMAND  - обработать меню приложения
-//  WM_PAINT    - Отрисовка главного окна
-//  WM_DESTROY  - отправить сообщение о выходе и вернуться
-//
-//
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    switch (message)
-    {
-    case WM_CREATE:
-    {
-        GetClientRect(hWnd, &windowRect);
+	switch (message)
+	{
+		case WM_CREATE:
+		{
+			mainWindow=hWnd;
 
+			GetClientRect(hWnd, &windowRect);
 
-        HWND button = CreateWindowExA
-        (
-            0L,
-            "button",
-            "Добавить",
-            WS_VISIBLE | WS_CHILD | ES_CENTER | BS_PUSHBUTTON,
-            0, windowRect.bottom-110,
-            60, 110,
-            hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
-        );
-        LOGFONT lf;
-        lf.lfHeight = 10;
-        SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
-        HFONT hFont = CreateFontIndirect(&lf);
-        SendMessage(button, WM_SETFONT, (WPARAM)hFont, TRUE);
-
-
-
-
+			HWND button = CreateWindowExA
+			(
+				0L,
+				"button",
+				"Добавить",
+				WS_VISIBLE | WS_CHILD | ES_CENTER | BS_DEFPUSHBUTTON | BS_PUSHBUTTON | WS_TABSTOP,
+				0, windowRect.bottom-110,
+				60, 110,
+				hWnd, (HMENU)IDS_ADD_BUTTON, NULL, NULL
+			);
+			LOGFONT lf{};
+			lf.lfHeight = 10;
+			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+			HFONT hFont = CreateFontIndirect(&lf);
+			SendMessage(button, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 
 
 
-        HWND hWndListView1 = CreateWindowEx
-        (
-            WS_EX_CLIENTEDGE,
-            WC_LISTVIEW,
-            NULL,
-            WS_CHILD | WS_VISIBLE | LVS_REPORT,
-            60, windowRect.bottom - 110, windowRect.right / 2-60, 110,
-            hWnd,
-            (HMENU)1,
-            hInst,
-            NULL
-        );
+			WNDCLASSEXW wcTable{};
+			wcTable.cbSize = sizeof(WNDCLASSEX);
+			wcTable.lpfnWndProc = &(addTable.WindowProc);
+			wcTable.cbClsExtra = 0;
+			wcTable.cbWndExtra = 0;
+			wcTable.hInstance = hInst;
+			wcTable.hIcon = NULL;
+			wcTable.hCursor = LoadCursor(nullptr, IDC_ARROW);
+			wcTable.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+			wcTable.lpszClassName = L"Table";
+			wcTable.lpszMenuName = NULL;
+			wcTable.hIconSm = NULL;
 
-        // Создаем вторую ListView
-        HWND hWndListView2 = CreateWindowEx
-        (
-            WS_EX_CLIENTEDGE,
-            WC_LISTVIEW,
-            NULL,
-            WS_CHILD | WS_VISIBLE | LVS_REPORT,
-            windowRect.right/2,0, windowRect.right / 2, windowRect.bottom,
-            hWnd,
-            (HMENU)2,
-            hInst,
-            NULL
-        );
+			RegisterClassExW(&wcTable);
+			addTable.CreateSelf
+			({
+				0,
+				L"Table",
+				L"t1",
+				WS_VISIBLE | WS_CHILD | WS_TABSTOP,
+				60, windowRect.bottom - 110,
+				windowRect.right / 2 - 60, 110,
+				hWnd,
+				NULL,
+				hInst,
+				&addTable 
+			});
 
-        // Инициализация шрифтов и других параметров для ListView
-        LOGFONT lf2;
-        lf2.lfHeight = 10;
-        SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf2, 0);
-        HFONT hFont2 = CreateFontIndirect(&lf2);
-        SendMessage(hWndListView1, WM_SETFONT, (WPARAM)hFont2, TRUE);
-        SendMessage(hWndListView2, WM_SETFONT, (WPARAM)hFont2, TRUE);
+			timersTable.CreateSelf
+			({
+				0,
+				L"Table",
+				L"t2",
+				WS_VISIBLE | WS_CHILD | WS_TABSTOP,
+				windowRect.right / 2, 0,
+				windowRect.right / 2, windowRect.bottom,
+				hWnd,
+				NULL,
+				hInst,
+				&timersTable
+			});
 
-        // Добавляем столбцы в первую ListView
-        LVCOLUMN lvc;
-        lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
-        lvc.cx = 100;
-        lvc.pszText =(wchar_t*) L"Column 1";
-        ListView_InsertColumn(hWndListView1, 0, &lvc);
-        lvc.pszText = (wchar_t*)L"Column 2";
-        ListView_InsertColumn(hWndListView1, 1, &lvc);
+		
 
-        // Добавляем столбцы во вторую ListView
-        lvc.pszText = (wchar_t*)L"Column A";
-        ListView_InsertColumn(hWndListView2, 0, &lvc);
-        lvc.pszText = (wchar_t*)L"Column B";
-        ListView_InsertColumn(hWndListView2, 1, &lvc);
-
-        // Пример добавления элементов в первую ListView
-        LVITEM lvi;
-        lvi.mask = LVIF_TEXT;
-        lvi.iItem = 0;
-        lvi.iSubItem = 0;
-        lvi.pszText = (wchar_t*)L"Item 1";
-        ListView_InsertItem(hWndListView1, &lvi);
-        lvi.iSubItem = 1;
-        lvi.pszText = (wchar_t*)L"SubItem 1.1";
-        ListView_SetItem(hWndListView1, &lvi);
-
-        // Пример добавления элементов во вторую ListView
-        lvi.iItem = 0;
-        lvi.iSubItem = 0;
-        lvi.pszText = (wchar_t*)L"Item A";
-        ListView_InsertItem(hWndListView2, &lvi);
-        lvi.iSubItem = 1;
-        lvi.pszText = (wchar_t*)L"SubItem A.1";
-        ListView_SetItem(hWndListView2, &lvi);
+			form.AddItem("tables","addTable", &addTable.GetWindowHandler());
+			form.AddItem("tables", "timersTable", &timersTable.GetWindowHandler());
+			form.AddItem("buttons","add",&button);
+			form.SetNewSize(windowRect.right, windowRect.bottom);
+			form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
+			try
+			{
+				form.Resize();
+			}
+			catch (std::exception&)
+			{
+				MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
+				DestroyWindow(hWnd);
+			}
+			break;
+		}
+		case WM_COMMAND:
+		{
+			addTable.ResetFocus();
 
 
+			int wmId = LOWORD(wParam);
+			// Разобрать выбор в меню:
+			switch (wmId)
+			{
+			case TIMER_STOPPED:
+			{
+				addTable.GetSelectedNumbers().erase((ULONGLONG)lParam);
+				break;
+			}
+			case IDS_ADD_BUTTON:
+			{
+				addTable.ResetFocus();
+				addTable.SelectFirst();
+				if (addTable.GetSelectedData().size())
+				{
+					InvalidateRect(timersTable.GetWindowHandler(), NULL, TRUE);
+					timersTable.AddRow(addTable.GetSelectedData()[addTable.GetSelectedData().size() - 1]);
+					addTable.GetSelectedData().pop_back();
+				}
+				SetFocus(form.GetItem("buttons", "add"));
 
-        ListView_SetOutlineColor(hWndListView1, RGB(255, 0, 0));
-        ListView_SetOutlineColor(hWndListView2, RGB(255, 0, 0));
+				break;
+			}
+			case IDM_ABOUT:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				break;
+			case IDM_EXIT:
+				DestroyWindow(hWnd);
+				break;
+			default:
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
+			if (wParam == SC_RESTORE)
+			{
+				RECT rect;
+				GetClientRect(hWnd, &rect);
+				form.SetNewSize(rect.right, rect.bottom);
+				form.Resize();
+				UpdateWindow(hWnd);
 
+				return DefWindowProcW(hWnd, message, wParam, lParam);
+			}
+			break;
+		}
+		case WM_SETFOCUS:
+		{
+			if (lParam == NULL)
+			{
+				if(addTable.IsInitilized())
+					addTable.ResetFocus();
+			}
+			else
+				SetFocus(form.GetItem("buttons","add"));
+			break;
+		}
+		case WM_LBUTTONDOWN:
+		{
+			addTable.ResetFocus();
+			timersTable.HideEditWindow();
+			break;
+		}
+		case WM_SIZE:
+		{
+			RECT rect;
+			GetClientRect(hWnd, &rect);
 
+			try
+			{
+				GetClientRect(hWnd, &windowRect);
+				form.SetNewSize(windowRect.right, windowRect.bottom);
+				form.Resize();
+			}
+			catch (std::exception&)
+			{
+				MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
+				DestroyWindow(hWnd);
+			}
+			addTable.ResetFocus();
+			break;
+		}
+		case WM_GETMINMAXINFO: //Получили сообщение от Винды
+		{
+			MINMAXINFO* pInfo = (MINMAXINFO*)lParam;
+			POINT Min = { 600, 400 };
+			pInfo->ptMinTrackSize = Min;
+			return 0;
+			break;
+		}
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			RECT windowRect; 
+			GetClientRect(hWnd, &windowRect);
+			HDC hdc = BeginPaint(hWnd, &ps);
+			
 
+			clockObj.SetWindowHandle(&hWnd);
+			clockObj.StartUpdateThread();
+			HDC memDC = CreateCompatibleDC(hdc);
+			HBITMAP memBM = 
+				CreateCompatibleBitmap(hdc, 
+					clockObj.GetRect().right - clockObj.GetRect().left+6, 
+					clockObj.GetRect().bottom - clockObj.GetRect().top+6);
+			SelectObject(memDC, memBM);
 
+			// Рисуем на внутреннем буфере
+			clockObj.Draw(&memDC);
 
-        form.AddItem("buttons","add",&button);
-        form.AddItem("listViews", "addListView", &hWndListView1);
-        form.AddItem("listViews", "showListView", &hWndListView2);
-        form.SetNewSize(windowRect.right, windowRect.bottom);
-        form.SetResizeMethod(DeclarativeClasses::Functions::ResizeFunctions::L1);
-        try
-        {
-            form.Resize();
-        }
-        catch (std::exception&)
-        {
-            MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
-            DestroyWindow(hWnd);
-        }
-        
+			// Копируем внутренний буфер на экран
+			BitBlt(hdc, 15, 15, 
+				clockObj.GetRect().right - clockObj.GetRect().left+6, 
+				clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
 
+			// Освобождаем ресурсы
+			DeleteObject(memBM);
+			DeleteDC(memDC);
 
-        break;
-    }
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        // Разобрать выбор в меню:
-        switch (wmId)
-        {
-        case IDS_ADD_BUTTON:
-        {
-            std::wstring items = GetAllListViewItems(form.GetItem("listViews", "addListView"));
-            MessageBoxW(hWnd, items.c_str(), L"Items in ListView 1", MB_OK);
-            break;
-        }
-        case IDM_ABOUT:
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-            break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-        break;
-    }
-    case WM_SIZE:
-    {
-        try
-        {
-            GetClientRect(hWnd, &windowRect);
-            form.SetNewSize(windowRect.right, windowRect.bottom);
-            form.Resize();
-        }
-        catch (std::exception&)
-        {
-            MessageBoxExW(hWnd, L"Ошибка функции изменения размера", L"Ошибка выполнения", MB_ICONERROR, NULL);
-            DestroyWindow(hWnd);
-        }
-        break;
-    }
-    case WM_GETMINMAXINFO: //Получили сообщение от Винды
-    {
-        MINMAXINFO* pInfo = (MINMAXINFO*)lParam;
-        POINT Min = { 600, 400 };
-        pInfo->ptMinTrackSize = Min;
-        return 0;
-        break;
-    }
-    case WM_PAINT:
-    {
-        PAINTSTRUCT ps;
-        RECT windowRect; 
-        GetClientRect(hWnd, &windowRect);
-        HDC hdc = BeginPaint(hWnd, &ps);
-            
-
-        clockObj.SetWindowHandle(&hWnd);
-        clockObj.StartUpdateThread();
-        HDC memDC = CreateCompatibleDC(hdc);
-        HBITMAP memBM = 
-            CreateCompatibleBitmap(hdc, 
-                clockObj.GetRect().right - clockObj.GetRect().left+6, 
-                clockObj.GetRect().bottom - clockObj.GetRect().top+6);
-        SelectObject(memDC, memBM);
-
-        // Рисуем на внутреннем буфере
-        clockObj.Draw(&memDC);
-
-        // Копируем внутренний буфер на экран
-        BitBlt(hdc, 15, 15, 
-            clockObj.GetRect().right - clockObj.GetRect().left+6, 
-            clockObj.GetRect().bottom - clockObj.GetRect().top+6, memDC, 0, 0, SRCCOPY);
-
-        // Освобождаем ресурсы
-        DeleteObject(memBM);
-        DeleteDC(memDC);
-
-            
-        EndPaint(hWnd, &ps);
-        break;
-    }
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
+			
+			EndPaint(hWnd, &ps);
+			break;
+		}
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
 }
 
 // Обработчик сообщений для окна "О программе".
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
 
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-
-
-
-
-
-
-
-std::wstring GetAllListViewItems(HWND hwndListView)
-{
-    int itemCount = ListView_GetItemCount(hwndListView);
-    int columnCount = Header_GetItemCount(ListView_GetHeader(hwndListView));
-    std::wstring allItems;
-    wchar_t itemText[256];
-
-    for (int i = 0; i < itemCount; ++i)
-    {
-        for (int j = 0; j < columnCount; ++j)
-        {
-            itemText[0] = L'\0';
-            ListView_GetItemText(hwndListView, i, j, itemText, 256);
-            allItems += itemText;
-            allItems += L"\t"; // Добавляем символ табуляции между элементами колонки
-        }
-        allItems += L"\n"; // Добавляем символ новой строки после каждой строки
-    }
-    return allItems;
-}
-
-void SetMinColumnWidth(NMHDR* pnmh, int minWidth)
-{
-    HD_NOTIFY* phdn = (HD_NOTIFY*)pnmh;
-    phdn->pitem->cxy = minWidth;
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
 }
